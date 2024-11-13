@@ -7,6 +7,7 @@
     <h1>Image Gallery</h1>
 
     <ul id="navigation">
+      {% for item in navigation %}
       <div>
         <h3>Original Image</h3>
         <img
@@ -14,7 +15,8 @@
           src="{{ item.original_image_url }}"
         />
 
-        <h3>Resized Image (200x200)</h3>
+        {% if item.resized_image_url %}
+        <h3>Resized Image</h3>
         <img
           style="height: 200px; width: 50%"
           src="{{ item.resized_image_url }}"

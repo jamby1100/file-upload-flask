@@ -102,6 +102,7 @@ def upload_file():
                     <img src="{resized_img_url}" alt="Resized Image"></img>
                 </html>
                 '''
+            redirect()
     return render_template('upload_image.html')
 
 

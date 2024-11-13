@@ -9,8 +9,8 @@ def resize_and_upload_image(file_path, width, height):
         with Image.open(file_path) as img:
             img = img.resize((width, height))
             img.save(resized_path)
-
-        return resized_path.lstrip('/tmp/')
+        final_path = resized_path.lstrip('/tmp/')
+        return final_path
 
     except Exception as e:
         raise Exception(f"Image resizing failed: {e}")
