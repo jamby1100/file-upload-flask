@@ -4,7 +4,8 @@ import psycopg2
 
 from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
-from db.mongodb.mongodb_connection import create_mongodb_connection
+from db.mongodb.mongodb import MongoDB
+from db.postgresql.postgresql import PostgreSQL
 
 UPLOAD_FOLDER = os.getenv("UPLOAD_DIRECTORY")
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -46,8 +47,8 @@ def upload_file():
             file.save(file_path)
 
             # save image_metadata to MongoDB
-
-            client, database, collection = create_mongodb_connection("file-uploads")
+            mongo_instance = MongoDB()
+            client, database, collection = mongo_instance.get_connection("file-uploads")
 
             result = collection.insert_one({
                 "file_path": filename
@@ -56,30 +57,15 @@ def upload_file():
             client.close()
 
             # save product_data to PostgreSQL
-            conn = psycopg2.connect(
-                host=os.environ["POSTGRESQL_DB_HOST"],
-                database=os.environ["POSTGRESQL_DB_DATABASE_NAME"],
-                user=os.environ['POSTGRESQL_DB_USERNAME'],
-                password=os.environ['POSTGRESQL_DB_PASSWORD']
+            psql_instance = PostgreSQL()
+            psql_instance.connect()
+            psql_instance.create_product(
+                name=request.form.get('product_name'),
+                image_mongodb_id= "12345",
+                stock_count=int(request.form.get('initial_stock_count')),
+                review="Sample Review"
             )
-            cur = conn.cursor()
-
-            product_name = request.form.get('product_name')
-            image_mongodb_id = "12345"
-            stock_count = int(request.form.get('initial_stock_count'))
-            review = "Sample Review"
-
-            cur.execute('INSERT INTO products (name, image_mongodb_id, stock_count, review)'
-                        'VALUES (%s, %s, %s, %s)',
-                        (product_name,
-                        image_mongodb_id,
-                        stock_count,
-                        review)
-            )
-
-            conn.commit()
-            cur.close()
-            conn.close()
+            psql_instance.close()
 
             img_url = url_for('download_file', name=filename)
 
@@ -104,7 +90,9 @@ def upload_file():
 
 @app.route('/images', methods=['GET'])
 def show_uploaded_images():
-    client, database, collection = create_mongodb_connection("file-uploads")
+    mongo_instance = MongoDB()
+    client, database, collection = mongo_instance.get_connection("file-uploads")
+
     data = list(collection.find({}))
     print(data)
     print("===")
