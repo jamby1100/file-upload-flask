@@ -5,9 +5,9 @@ import psycopg2
 
 class PostgreSQL:
   def __init__(self) -> None:
-    self.host=os.environ["POSTGRESQL_DB_HOST"],
-    self.database=os.environ["POSTGRESQL_DB_DATABASE_NAME"],
-    self.user=os.environ['POSTGRESQL_DB_USERNAME'],
+    self.host=os.environ["POSTGRESQL_DB_HOST"]
+    self.database=os.environ["POSTGRESQL_DB_DATABASE_NAME"]
+    self.user=os.environ['POSTGRESQL_DB_USERNAME']
     self.password=os.environ['POSTGRESQL_DB_PASSWORD']
   
   def connect(self):
