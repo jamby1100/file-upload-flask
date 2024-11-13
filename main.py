@@ -125,6 +125,10 @@ def show_uploaded_images():
         return render_template('view_images.html', navigation=parsed)
 
 
+# @app.route('/order', methods=['GET', 'POST'])
+# def create_order():
+#     if request.method == 'POST':
+#         pass
 
 @app.route('/uploads/<name>')
 def download_file(name):
