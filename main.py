@@ -1,18 +1,26 @@
 import os
 import json
-import psycopg2
-
 from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 from db.mongodb.mongodb import MongoDB
 from db.postgresql.postgresql import PostgreSQL
 
-UPLOAD_FOLDER = os.getenv("UPLOAD_DIRECTORY")
+from core.config import Config
+from core.celery_app import celery
+from pymongo import MongoClient
+from actions.celery_task import resize_and_upload_image
+from bson import ObjectId
+
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 ENV_MODE = os.getenv("ENV_MODE")
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config.from_object(Config)
+
+# Set up MongoDB
+client = MongoClient(app.config['MONGODB_DB_CONNECTION_URI'])
+mongo_db = client[app.config['MONGODB_DB_NAME']]
+
 
 @app.route("/")
 def hello_world():
@@ -43,17 +51,25 @@ def upload_file():
 
             # Upload the file
             filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file_path = os.path.join(app.config['UPLOAD_DIRECTORY'], filename)
             file.save(file_path)
 
-            # save image_metadata to MongoDB
+             # Save initial image metadata to MongoDB
             mongo_instance = MongoDB()
             client, database, collection = mongo_instance.get_connection("file-uploads")
 
-            result = collection.insert_one({
-                "file_path": filename
-            })
+            result = collection.insert_one({"original_image_url": filename})
+            image_mongo_id = result.inserted_id
 
+            # Trigger Celery task and wait for the resized image URL
+            task = resize_and_upload_image.delay(file_path, width=200, height=200)
+            resized_path = task.get()  # Wait synchronously for the task to complete
+
+            # Update MongoDB document with resized image URL
+            collection.update_one(
+                {"_id": ObjectId(image_mongo_id)},
+                {"$set": {"resized_image_url": resized_path}}
+            )
             client.close()
 
             # save product_data to PostgreSQL
@@ -67,42 +83,45 @@ def upload_file():
             )
             psql_instance.close()
 
-            img_url = url_for('download_file', name=filename)
+            original_img_url = url_for('download_file', name=filename)
+            resized_img_url = url_for('download_file', name=resized_path)
 
             if ENV_MODE == "backend":
                 return {
                     "filename": filename,
-                    "img_url": img_url
+                    "original_img_url": original_img_url,
+                    "resized_img_url": resized_img_url
                 }
             else:
                 return f'''
                 <!doctype html>
                 <html>
                     <h1>{filename}</h1>
-                    <img src={img_url}></img>
+                    <img src="{original_img_url}" alt="Original Image"></img>
+                    <h1>{resized_path} 200x200</h1>
+                    <img src="{resized_img_url}" alt="Resized Image"></img>
                 </html>
                 '''
-            
-            
-            redirect()
-    
     return render_template('upload_image.html')
+
 
 @app.route('/images', methods=['GET'])
 def show_uploaded_images():
     mongo_instance = MongoDB()
     client, database, collection = mongo_instance.get_connection("file-uploads")
 
+    # Retrieve data from MongoDB
     data = list(collection.find({}))
-    print(data)
-    print("===")
 
+    # Process each document to include both original and resized URLs
     parsed = []
     for d in data:
-        img_url = url_for('download_file', name=d['file_path'])
+        original_img_url = url_for('download_file', name=d['original_image_url'])
+        resized_img_url = url_for('download_file', name=d['resized_image_url'])
 
         parsed.append({
-            "image_url": img_url
+            "original_image_url": original_img_url,
+            "resized_image_url": resized_img_url
         })
     
     if ENV_MODE == "backend":
@@ -120,4 +139,4 @@ def show_uploaded_images():
 
 @app.route('/uploads/<name>')
 def download_file(name):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+    return send_from_directory(app.config["UPLOAD_DIRECTORY"], name)
