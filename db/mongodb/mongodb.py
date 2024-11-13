@@ -12,7 +12,7 @@ class MongoDB:
   def get_connection(self, collection_name):
     try:
         client = MongoClient(self.uri)
-        database = client[self.uri]
+        database = client[self.db_name]
         collection = database[collection_name]        
     except Exception as e:
         raise Exception(

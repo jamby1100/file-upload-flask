@@ -12,10 +12,10 @@ class PostgreSQL:
   
   def connect(self):
     self.conn = psycopg2.connect(
-      host=os.environ["POSTGRESQL_DB_HOST"],
-      database=os.environ["POSTGRESQL_DB_DATABASE_NAME"],
-      user=os.environ['POSTGRESQL_DB_USERNAME'],
-      password=os.environ['POSTGRESQL_DB_PASSWORD']
+      host=self.host,
+      database=self.database,
+      user=self.user,
+      password=self.password
     )
   
   def create_product(self, name, image_mongodb_id, stock_count, review):
