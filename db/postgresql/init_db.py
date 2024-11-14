@@ -13,20 +13,22 @@ cur = conn.cursor()
 # Execute a command: this creates a new table
 # https://stackoverflow.com/questions/28558920/postgresql-foreign-key-syntax
 cur.execute('DROP TABLE IF EXISTS products;')
-cur.execute('CREATE TABLE products (id serial PRIMARY KEY,'
-                                 'name varchar (150) NOT NULL,'
-                                 'image_mongodb_id varchar (150) NOT NULL,'
-                                 'stock_count integer NOT NULL,'
-                                 'constraint stock_nonnegative check (stock_count >= 0),'
-                                 'review text,'
-                                 'created_at date DEFAULT CURRENT_TIMESTAMP);'
-                                 )
-
+cur.execute('CREATE TABLE products ('
+            'id serial PRIMARY KEY,'
+            'name varchar(150) NOT NULL,'
+            'image_mongodb_id varchar(150) NOT NULL,'
+            'stock_count integer NOT NULL,'
+            'constraint stock_nonnegative check (stock_count >= 0),'
+            'review text,'
+            'price decimal(10, 2) NOT NULL, '  # Adding price column with precision 10 and scale 2 (for 2 decimal places)
+            'created_at date DEFAULT CURRENT_TIMESTAMP'
+            ');')
 
 
 cur.execute('DROP TABLE IF EXISTS orders;')
 cur.execute('CREATE TABLE orders (id serial PRIMARY KEY,'
                                  'customer_name varchar (150) NOT NULL,'
+                                 'product_id varchar(150) not null,'
                                  'total decimal NOT NULL,'
                                  'constraint total_nonnegative check (total >= 0),'
                                  'tax decimal NOT NULL,'

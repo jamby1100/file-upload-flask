@@ -1,27 +1,66 @@
 <!doctype html>
 <title>Create new order</title>
 <h1>Create new order</h1>
-<form method=post enctype=multipart/form-data>
+
+<form method="post" enctype="multipart/form-data">
     <div>
-        <b> Product ID </b>
-        <input type=text name=product_name>
+        <b> Price: </b> <span id="price">{{ product.price }}</span>
+        <b> Stock Availability: </b> <span>{{ product.stock_count }}</span>
     </div>
 
     <div>
-        <b> Initial Stock Count </b>
-        <input type=text name=initial_stock_count>
+        <b> Name</b>
+        <input type="text" id="name" name="name" required>
+    </div>
+    <div>
+        <b> Quantity</b>
+        <input type="number" id="quantity" name="quantity" min="1" max="{{ product.stock_count }}" value="1" required>
     </div>
 
     <div>
-        <b> Raw Image </b>
-        <input type=file name=file>
+        <b> Total Price: </b> <span id="total_price">0</span>
     </div>
 
-    <br>
-    <br>
+    <div>
+        <b> Tax (12%): </b> <span id="tax_amount">0</span>
+    </div>
+
+    <!-- Hidden fields to store product_id, totalPrice, and taxAmount -->
+    <input type="hidden" name="product_id" value="{{ id }}">
+    <input type="hidden" id="total_price_input" name="total_price">
+    <input type="hidden" id="tax_amount_input" name="tax_amount">
+
+    <br><br>
     
     <div>
-        <input type=submit value=Upload>
+        <input type="submit" value="Submit">
     </div>
-    
 </form>
+
+<script>
+// Function to update total price and tax
+function updateTotalPrice() {
+    const price = parseFloat(document.getElementById('price').textContent);
+    const quantity = parseInt(document.getElementById('quantity').value);
+    
+    // Calculate total price
+    const totalPrice = price * quantity;
+    
+    // Calculate tax (12% of total price)
+    const tax = totalPrice * 0.12;
+    
+    // Update the total price and tax display
+    document.getElementById('total_price').textContent = totalPrice.toFixed(2);
+    document.getElementById('tax_amount').textContent = tax.toFixed(2);
+    
+    // Set the hidden input fields with the updated values
+    document.getElementById('total_price_input').value = totalPrice.toFixed(2);
+    document.getElementById('tax_amount_input').value = tax.toFixed(2);
+}
+
+// Event listener to update total price and tax when quantity changes
+document.getElementById('quantity').addEventListener('input', updateTotalPrice);
+
+// Initial calculation on page load
+updateTotalPrice();
+</script>

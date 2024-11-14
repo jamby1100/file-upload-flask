@@ -1,5 +1,6 @@
 import os
 
+from decimal import Decimal
 from flask import flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 from db.mongodb.mongodb import MongoDB
@@ -47,16 +48,17 @@ class UploadFile:
 
                 client.close()
 
+                stock_count=int(request.form.get('initial_stock_count'))
                 # save product_data to PostgreSQL
                 psql_instance = PostgreSQL()
                 psql_instance.connect()
-                psql_instance.create_product(
+                product_id = psql_instance.create_product(
                     name=request.form.get('product_name'),
                     image_mongodb_id= "12345",
-                    stock_count=int(request.form.get('initial_stock_count')),
+                    price=250.00,
+                    stock_count=stock_count,
                     review="Sample Review"
-                )
-                psql_instance.close()
+                ).close()
 
                 img_url = url_for('download_file', name=filename)
 
