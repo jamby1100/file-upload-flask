@@ -13,16 +13,18 @@ class ViewImage:
         mongo_instance = MongoDB()
         client, database, collection = mongo_instance.get_connection("file-uploads")
 
+        # Retrieve data from MongoDB
         data = list(collection.find({}))
-        print(data)
-        print("===")
 
+        # Process each document to include both original and resized URLs
         parsed = []
         for d in data:
-            img_url = url_for('download_file', name=d['file_path'])
+            original_img_url = url_for('download_file', name=d['original_image_url'])
+            resized_img_url = url_for('download_file', name=d['resized_image_url'])
 
             parsed.append({
-                "image_url": img_url
+                "original_image_url": original_img_url,
+                "resized_image_url": resized_img_url
             })
         
         if ENV_MODE == "backend":

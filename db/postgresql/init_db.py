@@ -12,7 +12,7 @@ cur = conn.cursor()
 
 # Execute a command: this creates a new table
 # https://stackoverflow.com/questions/28558920/postgresql-foreign-key-syntax
-cur.execute('DROP TABLE IF EXISTS products;')
+cur.execute('DROP TABLE IF EXISTS products CASCADE;')
 cur.execute('CREATE TABLE products ('
             'id serial PRIMARY KEY,'
             'name varchar(150) NOT NULL,'
@@ -25,7 +25,7 @@ cur.execute('CREATE TABLE products ('
             ');')
 
 
-cur.execute('DROP TABLE IF EXISTS orders;')
+cur.execute('DROP TABLE IF EXISTS orders CASCADE;')
 cur.execute('CREATE TABLE orders (id serial PRIMARY KEY,'
                                  'customer_name varchar (150) NOT NULL,'
                                  'product_id varchar(150) not null,'
@@ -38,7 +38,7 @@ cur.execute('CREATE TABLE orders (id serial PRIMARY KEY,'
                                  'created_at date DEFAULT CURRENT_TIMESTAMP);'
                                  )
 
-cur.execute('DROP TABLE IF EXISTS stock_movements;')
+cur.execute('DROP TABLE IF EXISTS stock_movements CASCADE;')
 cur.execute('CREATE TABLE stock_movements (id serial PRIMARY KEY,'
                                  'product_id integer REFERENCES products,'
                                  'order_id integer REFERENCES orders,'                    

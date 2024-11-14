@@ -10,3 +10,6 @@ psycopg2-binary==2.9.9
 pymongo==4.10.1
 Werkzeug==3.0.4
 zipp==3.20.2
+celery==5.4.0
+redis==5.2.0
+pillow==11.0.0
