@@ -36,7 +36,7 @@ export POSTGRESQL_DB_HOST=localhost
 
 # run the app!
 flask --app main run
-
+flask --app main.py run
 # use this when in ec2
 flask --app main run --host 0.0.0.0
 ```
@@ -182,7 +182,21 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 
+# run python
+`python3 main.py`
+
+# celery server
+celery -A main.celery worker --loglevel=info
+
 # https://medium.com/@zghanem/troubleshooting-efs-mounting-volume-failed-mount-unknown-filesystem-type-efs-in-ecs-tasks-6de59137a653
+
+
+# kafkha
+
+
+# ufw
+sudo apt-get update
+sudo apt-get install ufw
 
 
 ```
