@@ -198,6 +198,9 @@ celery -A main.celery worker --loglevel=info
 sudo apt-get update
 sudo apt-get install ufw
 
+# check mongodb creds
+echo $MONGODB_DB_NAME
+echo $MONGODB_DB_CONNECTION_URI
 
 ```
 
