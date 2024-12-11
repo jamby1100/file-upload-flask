@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from db.mongodb.mongodb import MongoDB
 from db.postgresql.postgresql import PostgreSQL
 from tasks.resize_image import resize_and_upload_image
+from tasks.kafka_producer import resize_image
 from helpers import Helper
 from bson import ObjectId
 
@@ -47,7 +48,8 @@ class UploadFile:
                 image_mongo_id = result.inserted_id
 
                 # Trigger Celery task and wait for the resized image URL
-                task = resize_and_upload_image.delay(file_path, width=200, height=200)
+                # task = resize_and_upload_image.delay(file_path, width=200, height=200)
+                task = resize_image.delay(file_path, width=200, height=200)
                 resized_path = task.get()  # Wait synchronously for the task to complete
 
                 # Update MongoDB document with resized image URL
