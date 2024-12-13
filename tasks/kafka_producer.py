@@ -4,24 +4,17 @@ from confluent_kafka import Producer
 
 class KafkaProducer:
     def __init__(self, topic):
-        # Fetch bootstrap servers from environment variables
+        # Fetch bootstrap servers from environment variables or use default
         self.bootstrap_servers = os.getenv(
             'KAFKA_BOOTSTRAP_SERVERS',
-            'b-1-public.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9198,'
-            'b-2-public.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9198,'
+            'b-1-public.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9198,' 
+            'b-2-public.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9198,' 
             'b-3-public.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9198'
         )
         self.topic = topic
-        self.producer = Producer(self._get_producer_config())
-
-    def _get_producer_config(self):
-        # Return Kafka producer configuration
-        return {
-            'bootstrap.servers': self.bootstrap_servers,
-            'security.protocol': 'SSL',
-            'ssl.ca.location': '/etc/ssl/certs/ca-certificates.crt',  # Adjust as needed
-            'client.id': 'file-upload-app-producer'
-        }
+        
+        # Initialize the Kafka producer
+        self.producer = Producer({'bootstrap.servers': self.bootstrap_servers})
 
     def on_send_success(self, err, msg):
         if err:
