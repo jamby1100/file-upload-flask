@@ -5,7 +5,7 @@ from flask import flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 from db.mongodb.mongodb import MongoDB
 from db.postgresql.postgresql import PostgreSQL
-from tasks.resize_image import resize_image  # Assuming resize_image is a direct function, not a Celery task
+from tasks.kafka_producer import resize_image  # Assuming resize_image is a direct function, not a Celery task
 from helpers import Helper
 from bson import ObjectId
 
