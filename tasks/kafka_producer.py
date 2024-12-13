@@ -3,7 +3,7 @@ from kafka import KafkaProducer
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 import json
 
-BROKERS = 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098'
+BROKERS = ['boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098']
 region= 'ap-southeast-1'
 class MSKTokenProvider():
     def token(self):
