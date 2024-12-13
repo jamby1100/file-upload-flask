@@ -35,25 +35,12 @@ class UploadFile:
                 file_path = os.path.join(self.app.config['UPLOAD_DIRECTORY'], filename)
                 file.save(file_path)
 
-                # Save image metadata to MongoDB
+                # Save image_metadata to MongoDB
                 mongo_instance = MongoDB()
                 client, database, collection = mongo_instance.get_connection("file-uploads")
 
                 result = collection.insert_one({"original_image_url": filename})
-                image_mongo_id = result.inserted_id
-
-                # Synchronously call resize_image
-                resized_path = resize_image(file_path, width=200, height=200)
-                
-                # Update MongoDB document with resized image URL
-                collection.update_one(
-                    {"_id": ObjectId(image_mongo_id)},
-                    {"$set": {"resized_image_url": resized_path}}
-                )
-
-                client.close()
-
-                stock_count = int(request.form.get('initial_stock_count'))
+                image_mongodb_id = str(result.inserted_id)  # Convert ObjectId to string
 
                 # Save product data to PostgreSQL
                 psql_instance = PostgreSQL()
@@ -61,12 +48,13 @@ class UploadFile:
 
                 product_id = psql_instance.create_product(
                     name=request.form.get('product_name'),
-                    image_mongodb_id=image_mongo_id,  # Use actual MongoDB ID
+                    image_mongodb_id=image_mongodb_id,  # Use string version of ObjectId
                     price=250.00,
                     stock_count=stock_count,
                     review="Sample Review"
                 )
                 psql_instance.close()
+
 
                 original_img_url = url_for('download_file', name=filename)
                 resized_img_url = url_for('download_file', name=resized_path)
