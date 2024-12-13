@@ -16,7 +16,8 @@ def get_iam_authentication_credentials():
 def create_kafka_producer():
     # AWS MSK cluster settings
     kafka_broker = os.getenv('KAFKA_BROKER', 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098')
-    
+    access_key = os.getenv('ACCESS_KEY')
+    secrets_key = os.getenv('SECRETS_KEY')
     # Get IAM credentials for Kafka authentication
     iam_credentials = get_iam_authentication_credentials()
 
@@ -26,8 +27,8 @@ def create_kafka_producer():
         'security.protocol': 'SASL_SSL',
         'sasl.mechanism': 'AWS_MSK_IAM',
         'sasl.username': 'AWS_MSK_IAM',  # AWS IAM automatically handled
-        'aws.access.key.id': 'AKIA4XN4ORLBAKPQZZF7',  # Optional: specify AWS credentials if needed
-        'aws.secret.access.key': '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',  # Optional: specify AWS credentials if needed
+        'aws.access.key.id': access_key,  # Optional: specify AWS credentials if needed
+        'aws.secret.access.key': secrets_key,  # Optional: specify AWS credentials if needed
     })
 
     return producer
