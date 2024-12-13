@@ -7,6 +7,7 @@ from db.mongodb.mongodb import MongoDB
 from db.postgresql.postgresql import PostgreSQL
 from tasks.resize_image import resize_and_upload_image
 from tasks.kafka_producer import resize_image
+from kafka_producer import KafkaProducer
 from helpers import Helper
 from bson import ObjectId
 
@@ -26,8 +27,7 @@ class UploadFile:
                 return redirect(request.url)
             file = request.files['file']
             
-            # If the user does not select a file, the browser submits an
-            # empty file without a filename.
+            # If the user does not select a file, the browser submits an empty file without a filename.
             if file.filename == '':
                 flash('No selected file')
                 return redirect(request.url)
@@ -47,27 +47,31 @@ class UploadFile:
                 result = collection.insert_one({"original_image_url": filename})
                 image_mongo_id = result.inserted_id
 
-                # Trigger Celery task and wait for the resized image URL
-                task = resize_and_upload_image.delay(file_path, width=200, height=200)
-                # task = resize_image(file_path, width=200, height=200)
-                resized_path = task.get()  # Wait synchronously for the task to complete
+                # Initialize Kafka Producer and send resize task
+                kafka_producer = KafkaProducer(
+                    bootstrap_servers='b-1.imagecaching.ap-southeast-1.amazonaws.com:9092',
+                    topic='resize-image-topic'
+                )
 
-                # Update MongoDB document with resized image URL
+                # Send the resize task to Kafka (asynchronously)
+                kafka_producer.produce_resize_task(file_path, width=200, height=200)
+
+                # Update MongoDB document with placeholder resized image URL initially (optional)
                 collection.update_one(
                     {"_id": ObjectId(image_mongo_id)},
-                    {"$set": {"resized_image_url": resized_path}}
+                    {"$set": {"resized_image_url": "processing..."}}
                 )
 
                 client.close()
 
-                stock_count=int(request.form.get('initial_stock_count'))
+                stock_count = int(request.form.get('initial_stock_count'))
                 # save product_data to PostgreSQL
                 psql_instance = PostgreSQL()
                 psql_instance.connect()
 
                 product_id = psql_instance.create_product(
                     name=request.form.get('product_name'),
-                    image_mongodb_id= "12345",
+                    image_mongodb_id="12345",
                     price=250.00,
                     stock_count=stock_count,
                     review="Sample Review"
@@ -75,7 +79,7 @@ class UploadFile:
                 psql_instance.close()
                 
                 original_img_url = url_for('download_file', name=filename)
-                resized_img_url = url_for('download_file', name=resized_path)
+                resized_img_url = url_for('download_file', name="processing...")
 
             if ENV_MODE == "backend":
                 return {
@@ -89,7 +93,7 @@ class UploadFile:
                 <html>
                     <h1>{filename}</h1>
                     <img src="{original_img_url}" alt="Original Image"></img>
-                    <h1>{resized_path} 200x200</h1>
+                    <h1>{resized_img_url} 200x200</h1>
                     <img src="{resized_img_url}" alt="Resized Image"></img>
                 </html>
                 '''
