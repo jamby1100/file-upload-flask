@@ -28,11 +28,14 @@ def produce_resize_task(producer, topic, file_path, width, height):
     producer.produce(topic, json.dumps(message).encode('utf-8'), callback=on_send_success)
     producer.flush()
 
+# Retrieve the token from MSKAuthTokenProvider
+token_provider = MSKTokenProvider()
+
 producer = Producer({
     'bootstrap.servers': 'b-1.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-3.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-2.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098',
     'security.protocol': 'SASL_SSL',
     'sasl.mechanism': 'OAUTHBEARER',
-    'sasl.oauth.token.provider': tp
+    'sasl.oauthbearer.token': token_provider.token()  # Use the generated token here
 })
 
 # Example: Actual dynamic file path
