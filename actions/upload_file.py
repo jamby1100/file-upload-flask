@@ -1,7 +1,7 @@
 import os
 
 from decimal import Decimal
-from tasks.kafka_producer import KafkaProducer
+from tasks.kafka_producer import produce_resize_task
 from flask import flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 from db.mongodb.mongodb import MongoDB
@@ -46,14 +46,14 @@ class UploadFile:
                 result = collection.insert_one({"original_image_url": filename})
                 image_mongo_id = result.inserted_id
 
-                # Initialize Kafka Producer and send resize task
-                kafka_producer = KafkaProducer(
-                    bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-                    topic='resize-image-topic'
-                )
+                # # Initialize Kafka Producer and send resize task
+                # kafka_producer = KafkaProducer(
+                #     bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
+                #     topic='resize-image-topic'
+                # )
 
                 # Send the resize task to Kafka (asynchronously)
-                kafka_producer.produce_resize_task(file_path, width=200, height=200)
+                produce_resize_task(file_path, width=200, height=200)
 
                 # Update MongoDB document with placeholder resized image URL initially (optional)
                 collection.update_one(
