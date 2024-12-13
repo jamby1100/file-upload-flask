@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from db.mongodb.mongodb import MongoDB
 from db.postgresql.postgresql import PostgreSQL
 from tasks.resize_image import resize_and_upload_image
-from tasks.kafka_producer import KafkaProducer 
+from tasks.kafka_producer import KafkaProducer
 from helpers import Helper
 from bson import ObjectId
 
