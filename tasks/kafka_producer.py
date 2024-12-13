@@ -1,24 +1,60 @@
+import boto3
 from confluent_kafka import Producer
-import json
+import os
 
-class KafkaProducer:
-    def __init__(self, bootstrap_servers, topic):
-        self.bootstrap_servers = bootstrap_servers
-        self.topic = topic
-        self.producer = Producer({'bootstrap.servers': self.bootstrap_servers})
+# AWS IAM authentication for Kafka
+def get_iam_authentication_credentials():
+    # Get AWS credentials from IAM role or environment variables
+    session = boto3.Session()
+    credentials = session.get_credentials().get_frozen_credentials()
 
-    def on_send_success(self, record_metadata):
-        print(f"Message delivered to {record_metadata.topic} "
-              f"[{record_metadata.partition}] at offset {record_metadata.offset}")
+    return {
+        'sasl.username': 'AWS4-HMAC-SHA256',  # Static value for AWS IAM SASL
+        'sasl.password': credentials.session_token,  # Temporary session token
+    }
 
-    def on_send_error(self, err):
-        print(f"Error while sending message: {err}")
+def create_kafka_producer():
+    # AWS MSK cluster settings
+    kafka_broker = os.getenv('KAFKA_BROKER', 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098')
+    
+    # Get IAM credentials for Kafka authentication
+    iam_credentials = get_iam_authentication_credentials()
 
-    def produce_resize_task(self, file_path, width, height):
-        message = {
-            'file_path': file_path,
-            'width': width,
-            'height': height
-        }
-        self.producer.produce(self.topic, json.dumps(message), callback=self.on_send_success)
-        self.producer.flush()  # Ensure message is sent
+    # Create the Kafka producer with IAM SASL authentication
+    producer = Producer({
+        'bootstrap.servers': kafka_broker,
+        'security.protocol': 'SASL_SSL',
+        'sasl.mechanism': 'AWS_MSK_IAM',
+        'sasl.username': iam_credentials['sasl.username'],
+        'sasl.password': iam_credentials['sasl.password'],
+        'ssl.ca.location': '/path/to/ca-cert.pem',  # Path to CA certificate if needed for SSL
+        'request.timeout.ms': 60000,  # Timeout for requests
+    })
+
+    return producer
+
+def send_message_to_kafka(producer, topic, message):
+    try:
+        # Produce the message to the Kafka topic
+        producer.produce(topic, value=message)
+        producer.flush()
+        print(f"Message sent to Kafka topic {topic}: {message}")
+    except Exception as e:
+        print(f"Error producing message: {e}")
+
+# Main function to setup producer and send a test message
+def main():
+    # Create the Kafka producer
+    producer = create_kafka_producer()
+    
+    # Topic name where the image processing result will be sent
+    kafka_topic = 'image-processing-topic'
+    
+    # Message to send to Kafka (you can customize this)
+    message = "Resized image uploaded and ready."
+
+    # Send the message to Kafka
+    send_message_to_kafka(producer, kafka_topic, message)
+
+if __name__ == "__main__":
+    main()
