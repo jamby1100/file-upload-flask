@@ -1,9 +1,9 @@
 from confluent_kafka import Producer
-from kafka import KafkaProducer
-from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 import json
+from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 
-region= 'ap-southeast-1'
+region = 'ap-southeast-1'
+
 class MSKTokenProvider():
     def token(self):
         token, _ = MSKAuthTokenProvider.generate_auth_token(region)
@@ -11,43 +11,47 @@ class MSKTokenProvider():
 
 tp = MSKTokenProvider()
 
-producer = KafkaProducer(
-    bootstrap_servers=['b-1.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-3.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-2.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098'],
-    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-    retry_backoff_ms=500,
-    request_timeout_ms=20000,
-    security_protocol='SASL_SSL',
-    sasl_mechanism='OAUTHBEARER',
-    sasl_oauth_token_provider=tp,)
-    # def __init__(self, bootstrap_servers, topic):
-    #     self.bootstrap_servers = bootstrap_servers
-    #     self.topic = topic
-    #     self.producer = Producer({'bootstrap.servers': self.bootstrap_servers})
-
-def on_send_success(self, record_metadata):
+def on_send_success(record_metadata):
     print(f"Message delivered to {record_metadata.topic} "
-            f"[{record_metadata.partition}] at offset {record_metadata.offset}")
+          f"[{record_metadata.partition}] at offset {record_metadata.offset}")
 
-def on_send_error(self, err):
+def on_send_error(err):
     print(f"Error while sending message: {err}")
 
-def produce_resize_task(self, file_path, width, height):
+def produce_resize_task(producer, topic, file_path, width, height):
+    # Here, the file_path is passed directly into the function
     message = {
-        'file_path': file_path,
+        'file_path': file_path,  # The file path comes directly as an argument
         'width': width,
         'height': height
     }
-    self.producer.produce(self.topic, json.dumps(message), callback=self.on_send_success)
-    self.producer.flush()  # Ensure message is sent
+    producer.produce(topic, json.dumps(message).encode('utf-8'), callback=on_send_success)
+    producer.flush()
 
-# Continuously generate and send data
-while True:
-    data = produce_resize_task()
-    print(data)
-    try:
-        future = producer.send('resize-image-topic', value=data)
-        producer.flush()
-        record_metadata = future.get(timeout=10)
-        
-    except Exception as e:
-        print(e.with_traceback())
+producer = Producer({
+    'bootstrap.servers': 'b-1.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-3.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-2.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098',
+    'security.protocol': 'SASL_SSL',
+    'sasl.mechanism': 'OAUTHBEARER',
+    'sasl.oauth.token.provider': tp
+})
+
+# Example: Actual dynamic file path
+file_path = "path/to/actual/file.jpg"  # This would be dynamically set elsewhere in your code
+
+# Calling produce_resize_task with dynamic file path
+width = 800
+height = 600
+produce_resize_task(producer, 'resize-image-topic', file_path, width, height)
+print(f"Sent resize task for file: {file_path}")
+
+try:
+    # Sending the message to Kafka
+    future = producer.send('resize-image-topic', value=json.dumps({
+        'file_path': file_path,
+        'width': width,
+        'height': height
+    }))
+    producer.flush()
+    record_metadata = future.get(timeout=10)
+except Exception as e:
+    print(f"Error while sending message: {e}")
