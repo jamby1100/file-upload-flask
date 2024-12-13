@@ -1,7 +1,12 @@
-from confluent_kafka import Producer
-import json
+from kafka import KafkaProducer
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
+import json
+import random
+from datetime import datetime
 
+topicname = 'resize-image-topic'  # Change the topic name to your resize image topic
+
+BROKERS = 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098'
 region = 'ap-southeast-1'
 
 class MSKTokenProvider():
@@ -9,52 +14,53 @@ class MSKTokenProvider():
         token, _ = MSKAuthTokenProvider.generate_auth_token(region)
         return token
 
+# Instantiate the token provider
 tp = MSKTokenProvider()
 
-def on_send_success(record_metadata):
-    print(f"Message delivered to {record_metadata.topic} "
-          f"[{record_metadata.partition}] at offset {record_metadata.offset}")
+# Fetch the token from the MSKTokenProvider
+oauth_token = tp.token()
 
-def on_send_error(err):
-    print(f"Error while sending message: {err}")
+# Producer Configuration
+producer = KafkaProducer(
+    bootstrap_servers=BROKERS,
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    retry_backoff_ms=500,
+    request_timeout_ms=20000,
+    security_protocol='SASL_SSL',
+    sasl_mechanism='OAUTHBEARER',
+    sasl_plain_username='',  # For OAuthBearer, username is not required
+    sasl_plain_password=oauth_token  # Use the OAuth token as the password
+)
 
-def produce_resize_task(producer, topic, file_path, width, height):
-    # Here, the file_path is passed directly into the function
-    message = {
-        'file_path': file_path,  # The file path comes directly as an argument
-        'width': width,
-        'height': height
+# Method to generate resize task metadata
+def generate_resize_metadata(file_path, width, height):
+    now = datetime.now()
+    event_time = now.strftime("%Y-%m-%d %H:%M:%S")
+    
+    resize_data = {
+        "file_path": file_path,      # Path to the file that needs resizing
+        "width": width,              # Desired width for the image
+        "height": height,            # Desired height for the image
+        "event_time": event_time,    # Timestamp of the resize task
     }
-    producer.produce(topic, json.dumps(message).encode('utf-8'), callback=on_send_success)
-    producer.flush()
+    return resize_data
 
-# Retrieve the token from MSKAuthTokenProvider
-token_provider = MSKTokenProvider()
+# Continuously generate and send resize task data
+while True:
+    # Example image resize task with random file path and size
+    file_path = f"path/to/image_{random.randint(1000, 9999)}.jpg"
+    width = random.randint(100, 1000)  # Random width between 100 and 1000
+    height = random.randint(100, 1000)  # Random height between 100 and 1000
 
-producer = Producer({
-    'bootstrap.servers': 'b-1.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-3.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-2.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098',
-    'security.protocol': 'SASL_SSL',
-    'sasl.mechanism': 'OAUTHBEARER',
-    'sasl.oauthbearer.token': token_provider.token()  # Use the generated token here
-})
-
-# Example: Actual dynamic file path
-file_path = "path/to/actual/file.jpg"  # This would be dynamically set elsewhere in your code
-
-# Calling produce_resize_task with dynamic file path
-width = 800
-height = 600
-produce_resize_task(producer, 'resize-image-topic', file_path, width, height)
-print(f"Sent resize task for file: {file_path}")
-
-try:
-    # Sending the message to Kafka
-    future = producer.send('resize-image-topic', value=json.dumps({
-        'file_path': file_path,
-        'width': width,
-        'height': height
-    }))
-    producer.flush()
-    record_metadata = future.get(timeout=10)
-except Exception as e:
-    print(f"Error while sending message: {e}")
+    # Generate metadata for the resize task
+    resize_metadata = generate_resize_metadata(file_path, width, height)
+    
+    print(resize_metadata)  # Print the metadata (you can remove this in production)
+    
+    try:
+        # Send the metadata to the Kafka topic
+        future = producer.send(topicname, value=resize_metadata)
+        producer.flush()  # Ensure the message is sent
+        record_metadata = future.get(timeout=10)
+    except Exception as e:
+        print(f"Error while sending message: {e}")
