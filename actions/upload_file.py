@@ -49,7 +49,7 @@ class UploadFile:
 
                 # Initialize Kafka Producer and send resize task
                 kafka_producer = KafkaProducer(
-                    bootstrap_servers='b-1.imagecaching.ap-southeast-1.amazonaws.com:9092',
+                    bootstrap_servers='b-1-public.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9198,b-2-public.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9198,b-3-public.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9198',
                     topic='resize-image-topic'
                 )
 
