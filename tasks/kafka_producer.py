@@ -25,10 +25,9 @@ def create_kafka_producer():
         'bootstrap.servers': kafka_broker,
         'security.protocol': 'SASL_SSL',
         'sasl.mechanism': 'AWS_MSK_IAM',
-        'sasl.username': iam_credentials['sasl.username'],
-        'sasl.password': iam_credentials['sasl.password'],
-        'ssl.ca.location': '/path/to/ca-cert.pem',  # Path to CA certificate if needed for SSL
-        'request.timeout.ms': 60000,  # Timeout for requests
+        'sasl.username': 'AWS_MSK_IAM',  # AWS IAM automatically handled
+        'aws.access.key.id': 'AKIA4XN4ORLBAKPQZZF7',  # Optional: specify AWS credentials if needed
+        'aws.secret.access.key': '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',  # Optional: specify AWS credentials if needed
     })
 
     return producer
