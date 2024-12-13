@@ -11,6 +11,9 @@ class MainApp:
         self.app = Flask(__name__)
         self.app.config.from_object(config_class)
 
+          # Set a secret key for session management
+        self.app.secret_key = os.urandom(24)  # You can replace this with a fixed key if needed
+        
         # Initialize components
         self.upload_instance = UploadFile(self.app)
         self.images_instance = ViewImage(self.app)
