@@ -9,16 +9,14 @@ topicname = 'resize-image-topic'  # Change the topic name to your resize image t
 BROKERS = 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098'
 region = 'ap-southeast-1'
 
-class MSKTokenProvider():
+# Define a class that generates the token for the Kafka producer
+class MSKTokenProvider:
     def token(self):
         token, _ = MSKAuthTokenProvider.generate_auth_token(region)
         return token
 
 # Instantiate the token provider
 tp = MSKTokenProvider()
-
-# Fetch the token from the MSKTokenProvider
-oauth_token = tp.token()
 
 # Producer Configuration
 producer = KafkaProducer(
@@ -28,8 +26,7 @@ producer = KafkaProducer(
     request_timeout_ms=20000,
     security_protocol='SASL_SSL',
     sasl_mechanism='OAUTHBEARER',
-    sasl_plain_username='',  # For OAuthBearer, username is not required
-    sasl_plain_password=oauth_token  # Use the OAuth token as the password
+    sasl_oauth_token_provider=tp.token,  # Pass the token method directly as the provider
 )
 
 # Method to generate resize task metadata
