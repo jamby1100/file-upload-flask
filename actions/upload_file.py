@@ -48,8 +48,8 @@ class UploadFile:
                 image_mongo_id = result.inserted_id
 
                 # Trigger Celery task and wait for the resized image URL
-                task = resize_and_upload_image.delay(file_path, width=200, height=200)
-                # task = resize_image.delay(file_path, width=200, height=200)
+                # task = resize_and_upload_image.delay(file_path, width=200, height=200)
+                task = resize_image.delay(file_path, width=200, height=200)
                 resized_path = task.get()  # Wait synchronously for the task to complete
 
                 # Update MongoDB document with resized image URL

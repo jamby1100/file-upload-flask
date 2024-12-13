@@ -146,6 +146,7 @@ psql postgres
 CREATE ROLE flask_photo_app_admin WITH LOGIN SUPERUSER PASSWORD 'sac2c2qec1131DSq@#1';
 CREATE DATABASE ecv_file_upload_app_psql;
 
+
 # show databases
 \l
 
@@ -188,10 +189,13 @@ pip install -r requirements.txt
 # celery server
 celery -A main.celery worker --loglevel=info
 
+#
+
 # https://medium.com/@zghanem/troubleshooting-efs-mounting-volume-failed-mount-unknown-filesystem-type-efs-in-ecs-tasks-6de59137a653
 
 
 # kafkha
+pip install confluent-kafka Pillow
 
 
 # ufw
