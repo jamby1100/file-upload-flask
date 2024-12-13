@@ -1,59 +1,55 @@
-import boto3
-from confluent_kafka import Producer
+from confluent_kafka import Consumer, KafkaException
+from PIL import Image
+import json
 import os
 
-# AWS IAM authentication for Kafka
-def get_iam_authentication_credentials():
-    # Get AWS credentials from IAM role or environment variables
-    session = boto3.Session()
-    credentials = session.get_credentials().get_frozen_credentials()
+# Kafka configuration
+conf = {
+    'bootstrap.servers': 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',  # Replace with your Kafka broker address
+    'group.id': 'image-resize-consumer',
+    'auto.offset.reset': 'earliest'
+}
 
-    return {
-        'sasl.username': 'AWS4-HMAC-SHA256',  # Static value for AWS IAM SASL
-        'sasl.password': credentials.session_token,  # Temporary session token
-    }
+consumer = Consumer(conf)
 
-def create_kafka_producer():
-    # AWS MSK cluster settings
-    kafka_broker = os.getenv('KAFKA_BROKER', 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098')
-    
-    # Get IAM credentials for Kafka authentication
-    iam_credentials = get_iam_authentication_credentials()
-
-    # Create the Kafka producer with IAM SASL authentication
-    producer = Producer({
-        'bootstrap.servers': kafka_broker,
-        'security.protocol': 'SASL_SSL',
-        'sasl.mechanism': 'AWS_MSK_IAM',
-        'sasl.username': iam_credentials['sasl.username'],
-        'sasl.password': iam_credentials['sasl.password'],
-        'request.timeout.ms': 60000,  # Timeout for requests
-    })
-
-    return producer
-
-def send_message_to_kafka(producer, topic, message):
+def resize_image(file_path, width, height):
+    resized_path = file_path.replace(".", "_resized.")
     try:
-        # Produce the message to the Kafka topic
-        producer.produce(topic, value=message)
-        producer.flush()
-        print(f"Message sent to Kafka topic {topic}: {message}")
+        with Image.open(file_path) as img:
+            img = img.resize((width, height))
+            img.save(resized_path)
+        final_path = resized_path.lstrip('/tmp/')
+        return final_path
     except Exception as e:
-        print(f"Error producing message: {e}")
+        print(f"Error resizing image: {e}")
+        return None
 
-# Main function to setup producer and send a test message
-def main():
-    # Create the Kafka producer
-    producer = create_kafka_producer()
-    
-    # Topic name where the image processing result will be sent
-    kafka_topic = 'image-processing-topic'
-    
-    # Message to send to Kafka (you can customize this)
-    message = "Resized image uploaded and ready."
+def consume_resize_tasks():
+    consumer.subscribe(['image-resize'])  # Subscribe to the topic
 
-    # Send the message to Kafka
-    send_message_to_kafka(producer, kafka_topic, message)
+    try:
+        while True:
+            msg = consumer.poll(timeout=1.0)
+            if msg is None:
+                continue
+            if msg.error():
+                if msg.error().code() == KafkaError._PARTITION_EOF:
+                    print(f"End of partition reached {msg.partition} {msg.offset}")
+                else:
+                    raise KafkaException(msg.error())
+            else:
+                task = json.loads(msg.value().decode('utf-8'))
+                file_path = task['file_path']
+                width = task['width']
+                height = task['height']
+                print(f"Received task to resize image: {file_path}, {width}x{height}")
+                result = resize_image(file_path, width, height)
+                if result:
+                    print(f"Resized image saved to {result}")
+                else:
+                    print(f"Failed to resize image: {file_path}")
 
-if __name__ == "__main__":
-    main()
+    except KeyboardInterrupt:
+        print("Terminating consumer...")
+    finally:
+        consumer.close()
