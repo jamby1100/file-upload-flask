@@ -12,7 +12,7 @@ class MSKTokenProvider():
 tp = MSKTokenProvider()
 
 producer = KafkaProducer(
-    bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
+    bootstrap_servers='b-1.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-3.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098,b-2.democluster1.gp4ygf.c3.kafka.ap-southeast-1.amazonaws.com:9098',
     value_serializer=lambda v: json.dumps(v).encode('utf-8'),
     retry_backoff_ms=500,
     request_timeout_ms=20000,
