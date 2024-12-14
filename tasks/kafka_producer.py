@@ -17,7 +17,6 @@ tp = MSKTokenProvider()
 # Kafka producer configuration
 producer = KafkaProducer(
     bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-    pi_version=(0,11,5),
     value_serializer=lambda v: json.dumps(v).encode('utf-8'),
     retry_backoff_ms=500,
     request_timeout_ms=20000,
