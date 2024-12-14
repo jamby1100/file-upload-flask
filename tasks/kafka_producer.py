@@ -1,17 +1,29 @@
 from kafka import KafkaProducer
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 import json
+import time
 
 # AWS region where MSK cluster is located
 region = 'ap-southeast-1'
 
 # Class to provide MSK authentication token
 class MSKTokenProvider:
-    def token(self):
-        token, _ = MSKAuthTokenProvider.generate_auth_token(region)
+    def __init__(self):
+        self.token = None
+        self.token_expiration = None
+        self.region = region
         
-        print(token,'tokengen')
-        return token
+    def get_token(self):
+        # Check if the token is still valid
+        if self.token is None or time.time() > self.token_expiration:
+            # Token is either expired or not available, generate a new one
+            token, expiration = MSKAuthTokenProvider.generate_auth_token(self.region)
+            self.token = token
+            self.token_expiration = expiration
+            print(f"Generated new token: {self.token}")
+        else:
+            print(f"Using cached token: {self.token}")
+        return self.token
 
 # Create an instance of MSKTokenProvider class
 tp = MSKTokenProvider()
@@ -24,7 +36,7 @@ producer = KafkaProducer(
     request_timeout_ms=30000,
     security_protocol='SASL_SSL',
     sasl_mechanism='OAUTHBEARER',
-    sasl_oauth_token_provider=tp,
+    sasl_oauth_token_provider=tp.get_token,
 )
 
 # Function to send resize task to Kafka
