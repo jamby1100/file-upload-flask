@@ -1,5 +1,5 @@
 import logging
-from kafka import KafkaProducer, KafkaError
+from kafka import KafkaProducer, KafkaException
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 import json
 import time
@@ -44,7 +44,7 @@ while retries < max_retries:
         producer.partitions_for('image-resize')
         logger.info("Successfully connected to the Kafka broker!")
         break
-    except KafkaError as e:
+    except KafkaException as e:
         retries += 1
         logger.error(f"Connection failed, retrying {retries}/{max_retries}: {e}")
         time.sleep(5)
@@ -65,5 +65,5 @@ def send_resize_task(file_path, width, height):
         producer.send('image-resize', task)
         producer.flush()  # Ensure the message is sent
         logger.info(f"Resize task sent: {task}")
-    except KafkaError as e:
+    except KafkaException as e:
         logger.error(f"Failed to send resize task: {e}")
