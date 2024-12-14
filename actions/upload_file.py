@@ -53,7 +53,7 @@ class UploadFile:
                 # )
 
                 # Send the resize task to Kafka (asynchronously)
-                # produce_resize_task(file_path, width=200, height=200)
+                produce_resize_task(file_path, width=200, height=200)
 
                 # Update MongoDB document with placeholder resized image URL initially (optional)
                 collection.update_one(
