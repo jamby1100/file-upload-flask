@@ -7,7 +7,6 @@ from db.mongodb.mongodb import MongoDB
 from db.postgresql.postgresql import PostgreSQL
 from tasks.resize_image import resize_and_upload_image
 from tasks.kafka_producer import send_resize_task
-from kafka_producer import KafkaProducer
 from helpers import Helper
 from bson import ObjectId
 
