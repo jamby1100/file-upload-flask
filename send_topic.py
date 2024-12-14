@@ -36,7 +36,7 @@ def send_simple_message():
     message = {"message": "Hello, Kafka!"}
     
     # Send the message to Kafka
-    producer.send('your-topic-name', message)
+    producer.send('your-topic-name', message.encode())
     producer.flush()  # Ensure the message is sent
     print(f"Simple message sent: {message}")
 
