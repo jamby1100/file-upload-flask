@@ -9,6 +9,7 @@ class MSKTokenProvider:
     def token(self):
         # Generate a token using the MSKAuthTokenProvider
         token, _ = MSKAuthTokenProvider.generate_auth_token(region)
+        print(token,'genrate token')
         return token
 
 # Create an instance of MSKTokenProvider class
@@ -18,9 +19,9 @@ tp = MSKTokenProvider()
 try:
     admin_client = KafkaAdminClient(
         bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-        security_protocol='SASL_SSL',
-        sasl_mechanism='OAUTHBEARER',
-        sasl_oauth_token_provider=tp,
+        security_protocol='PLAINTEXT',
+        # sasl_mechanism='OAUTHBEARER',
+        # sasl_oauth_token_provider=tp,
         client_id='client1',
         api_version=(2, 8, 0), 
         retry_backoff_ms=500,
