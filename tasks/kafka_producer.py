@@ -35,7 +35,7 @@ producer = KafkaProducer(
     request_timeout_ms=30000,
     security_protocol='SASL_SSL',
     sasl_mechanism='OAUTHBEARER',
-    sasl_oauth_token_provider=tp,
+    sasl_oauth_token_provider=tp,  # Ensure the correct instance is passed
 )
 
 # Function to send resize task to Kafka
