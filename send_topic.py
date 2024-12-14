@@ -33,7 +33,7 @@ producer = KafkaProducer(
 # Function to send a simple message to Kafka
 def send_simple_message():
     # Construct a simple message
-    message = {"message": "Hello, Kafka!"}
+    message = 'hello'
     
     # Send the message to Kafka
     producer.send('your-topic-name', message.encode())
