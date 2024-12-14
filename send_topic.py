@@ -21,8 +21,9 @@ admin_client = KafkaAdminClient(
     sasl_oauth_token_provider=tp,
     client_id='client1',
     api_version=(2, 8, 0),
+        retry_backoff_ms=500,
+    request_timeout_ms=30000,
 )
-
 # create topic
 topic_name="mytopic"
 topic_list =[NewTopic(name=topic_name, num_partitions=1, replication_factor=2)]
