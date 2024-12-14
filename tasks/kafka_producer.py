@@ -19,12 +19,12 @@ class MSKTokenProvider:
 token_provider = MSKTokenProvider()
 
 consumer_config = {
-    'bootstrap.servers': 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-    'security.protocol': 'SASL_SSL',
-    'sasl.mechanism': 'OAUTHBEARER',
-    'sasl.oauth.token.provider': token_provider,
-    'group.id': 'image-resize-consumer',
-    'auto.offset.reset': 'earliest'
+    'bootstrap_servers': 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
+    'security_protocol': 'SASL_SSL',
+    'sasl_mechanism': 'OAUTHBEARER',
+    'sasl_oauth_token_provider': token_provider,
+    'client_id': 'image-resize-consumer',
+    # 'auto.offset.reset': 'earliest'
 }
 
 consumer = Consumer(consumer_config)
