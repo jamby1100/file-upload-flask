@@ -10,7 +10,7 @@ class MSKTokenProvider:
     def token(self):
         token, _ = MSKAuthTokenProvider.generate_auth_token(region)
         
-        print(token)
+        print(token,'token generated')
         return token
 
 # Create an instance of MSKTokenProvider class
