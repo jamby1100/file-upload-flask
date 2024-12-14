@@ -34,9 +34,14 @@ producer = KafkaProducer(
 def send_simple_message():
     # Construct a simple message
     message = 'hello'
-    
+    someDict = {'message':'hello'}
+    kafkaValue = json.dumps(someDict, separators=(',', ':'))
+    producer.send(
+    topic="your-topic-name", # <-- just string
+    key=bytes("00909", encoding='utf8'), # <-- encoding='utf8'
+    value=bytes(kafkaValue, encoding='utf8')) # <-- bytes
     # Send the message to Kafka
-    producer.send('your-topic-name', message.encode())
+    # producer.send('your-topic-name', message.encode())
     producer.flush()  # Ensure the message is sent
     print(f"Simple message sent: {message}")
 
