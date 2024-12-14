@@ -19,13 +19,14 @@ data = {"name": "xyz", "email": "xyz@"}
 
 
 def send_msg_async(msg):
-    print("Sending message")
+    # print("Sending message")
     try:
         msg_json_str = str({"data": json.dumps(msg)})
         producer.produce(
             'your-topic-name',
             msg_json_str
         )
+        print('sent-message', msg_json_str)
         producer.flush()
     except Exception as ex:
         print("Error : ", ex)
