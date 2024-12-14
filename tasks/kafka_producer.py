@@ -23,7 +23,7 @@ producer = KafkaProducer(
     retry_backoff_ms=500,
     request_timeout_ms=30000,
     security_protocol='PLAINTEXT',
-    sasl_mechanism='OAUTHBEARER',
+    # sasl_mechanism='OAUTHBEARER',
     sasl_oauth_token_provider=tp,
 )
 
