@@ -23,7 +23,7 @@ consumer_config = {
     'security_protocol': 'SASL_SSL',
     'sasl_mechanism': 'OAUTHBEARER',
     'sasl_oauth_token_provider': token_provider,
-    'client_id': 'image-resize-consumer',
+    'group.id': 'image-resize-consumer',
     # 'auto.offset.reset': 'earliest'
 }
 
