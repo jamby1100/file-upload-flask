@@ -9,6 +9,8 @@ region = 'ap-southeast-1'
 class MSKTokenProvider:
     def token(self):
         token, _ = MSKAuthTokenProvider.generate_auth_token(region)
+        
+        print(token,'tokengen')
         return token
 
 # Create an instance of MSKTokenProvider class
