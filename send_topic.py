@@ -2,7 +2,7 @@ from kafka.admin import KafkaAdminClient, NewTopic
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 
 # AWS region where MSK cluster is located
-region= '<UPDATE_AWS_REGION_NAME_HERE>'
+region= 'ap-southeast-1'
 
 # Class to provide MSK authentication token
 class MSKTokenProvider():
@@ -15,7 +15,7 @@ tp = MSKTokenProvider()
 
 # Initialize KafkaAdminClient with required configurations
 admin_client = KafkaAdminClient(
-    bootstrap_servers='<UPDATE_BOOTSTRAP_SERVER_STRING_HERE>',
+    bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
     security_protocol='SASL_SSL',
     sasl_mechanism='OAUTHBEARER',
     sasl_oauth_token_provider=tp,
