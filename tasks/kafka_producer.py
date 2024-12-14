@@ -13,7 +13,7 @@ class MSKTokenProvider:
         self.token_expiration = None
         self.region = region
         
-    def get_token(self):
+    def token(self):
         # Check if the token is still valid
         if self.token is None or time.time() > self.token_expiration:
             # Token is either expired or not available, generate a new one
@@ -36,7 +36,7 @@ producer = KafkaProducer(
     request_timeout_ms=30000,
     security_protocol='SASL_SSL',
     sasl_mechanism='OAUTHBEARER',
-    sasl_oauth_token_provider=tp.get_token,
+    sasl_oauth_token_provider=tp,  # Pass the instance itself
 )
 
 # Function to send resize task to Kafka
