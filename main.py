@@ -1,56 +1,101 @@
 import os
 
-from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
+from decimal import Decimal
+from tasks.kafka_producer import send_resize_task
+from flask import flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
-from actions.upload_file import UploadFile
-from actions.view_images import ViewImage
-from core.config import Config
-from core.celery_app import celery
-class MainApp:
-    def __init__(self, config_class=Config):
-        self.app = Flask(__name__)
-        self.app.config.from_object(config_class)
+from db.mongodb.mongodb import MongoDB
+from db.postgresql.postgresql import PostgreSQL
+from tasks.resize_image import resize_and_upload_image
+from helpers import Helper
+from bson import ObjectId
 
-        # Initialize components
-        self.upload_instance = UploadFile(self.app)
-        self.images_instance = ViewImage(self.app)
-        
-        
-        self.configurable_routes()
+ENV_MODE = os.getenv("ENV_MODE")
+class UploadFile:
+    def __init__(self, app):
+        self.app = app
 
-    def configurable_routes(self):
-        @self.app.route("/")
-        def hello_world():
-            return "<p>Hello, World!</p>"
-        
-        @self.app.route('/uploads/<name>')
-        def download_file(name):
-            return send_from_directory(self.app.config["UPLOAD_DIRECTORY"], name)
-        
-        @self.app.route('/images', methods=['GET'])
-        def show_uploaded_images():
-            return self.images_instance.list()
+    def upload(self):
+        print("AND THE FORM IS")
+        print(request.form)
+        if request.method == 'POST':
 
-        # @self.app.route('/order', methods=['GET', 'POST'])
-        # def create_order():
-        #     if request.method == 'POST':
-        #         pass
-        
-        @self.app.route("/upload-file", methods=['GET', 'POST'])
-        def upload_file_route():
-            return self.upload_instance.upload()
-        
-        @self.app.route("/process-task", methods=['POST'])
-        def process_task():
-            # Assuming we're passing some data for the task
-            task = celery.send_task('app.tasks.example_task', args=['some data'])
-            return f'Task {task.id} started!'
-        
-        
-    def run(self, **kwargs):
-        self.app.run(**kwargs)
+            # check if the post request has the file part
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            
+            # If the user does not select a file, the browser submits an empty file without a filename.
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file and Helper.allowed_file(file.filename):
 
-# Running the apt apt
-if __name__ == "__main__":
-    main_app = MainApp()
-    main_app.run(debug=True, host='0.0.0.0', port=2000)
+                # Upload the file
+                filename = secure_filename(file.filename)
+                print("AND THE APP IS", self.app)
+                print("AND THE APP CONFIG IS", self.app.config)
+                file_path = os.path.join(self.app.config['UPLOAD_DIRECTORY'], filename)
+                file.save(file_path)
+
+                # save image_metadata to MongoDB
+                mongo_instance = MongoDB()
+                client, database, collection = mongo_instance.get_connection("file-uploads")
+
+                result = collection.insert_one({"original_image_url": filename})
+                image_mongo_id = result.inserted_id
+
+                # # Initialize Kafka Producer and send resize task
+                # kafka_producer = KafkaProducer(
+                #     bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
+                #     topic='resize-image-topic'
+                # )
+
+                # Send the resize task to Kafka (asynchronously)
+                send_resize_task(file_path, width=200, height=200)
+
+                # Update MongoDB document with placeholder resized image URL initially (optional)
+                collection.update_one(
+                    {"_id": ObjectId(image_mongo_id)},
+                    {"$set": {"resized_image_url": "processing..."}}
+                )
+
+                client.close()
+
+                stock_count = int(request.form.get('initial_stock_count'))
+                # save product_data to PostgreSQL
+                psql_instance = PostgreSQL()
+                psql_instance.connect()
+
+                product_id = psql_instance.create_product(
+                    name=request.form.get('product_name'),
+                    image_mongodb_id="12345",
+                    price=250.00,
+                    stock_count=stock_count,
+                    review="Sample Review"
+                )
+                psql_instance.close()
+                
+                original_img_url = url_for('download_file', name=filename)
+                resized_img_url = url_for('download_file', name="processing...")
+
+            if ENV_MODE == "backend":
+                return {
+                    "filename": filename,
+                    "original_img_url": original_img_url,
+                    "resized_img_url": resized_img_url
+                }
+            else:
+                return f'''
+                <!doctype html>
+                <html>
+                    <h1>{filename}</h1>
+                    <img src="{original_img_url}" alt="Original Image"></img>
+                    <h1>{resized_img_url} 200x200</h1>
+                    <img src="{resized_img_url}" alt="Resized Image"></img>
+                </html>
+                '''
+            
+            redirect()
+        return render_template('upload_image.html')
