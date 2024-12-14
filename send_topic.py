@@ -1,52 +1,42 @@
-from kafka import KafkaAdminClient
-from kafka.admin import NewTopic
-from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
+from confluent_kafka import Producer
+import boto3
+import json
 
-# Define the AWS region and Kafka configuration
-region = 'ap-southeast-1'
-bootstrap_servers = 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098'
+# Fetch MSK Bootstrap Servers
+def get_msk_bootstrap_servers(cluster_arn):
+    client = boto3.client("kafka")
+    response = client.get_bootstrap_brokers(ClusterArn=cluster_arn)
+    return response["BootstrapBrokerStringSaslIam"]
 
-# Token provider class for Kafka 2.6.1
-class MSKTokenProvider:
-    def token(self):
-        try:
-            # Generate an IAM authentication token
-            token, _ = MSKAuthTokenProvider.generate_auth_token(region)
-            print("Successfully generated IAM token for Kafka.")  # Debugging
-            return token
-        except Exception as e:
-            print(f"Error generating token: {e}")
-            raise
+# Produce message to the MSK topic
+def produce_message(bootstrap_servers, topic_name, message):
+    # Configure Kafka Producer with IAM SASL
+    conf = {
+        'bootstrap.servers': bootstrap_servers,
+        'security.protocol': 'SASL_SSL',
+        'sasl.mechanisms': 'AWS_MSK_IAM',
+        'sasl.username': '',  
+        'sasl.password': '', 
+    }
 
+    producer = Producer(conf)
 
-# Instance of the token provider
-token_provider = MSKTokenProvider()
+    try:
+        # Send message to topic
+        producer.produce(topic_name, value=json.dumps(message))
+        producer.flush()  # Ensure all messages are sent
+        print(f"Message sent to topic '{topic_name}': {message}")
+    except Exception as e:
+        print(f"Failed to produce message: {e}")
 
-try:
-    # Initialize Kafka Admin Client
-    admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers,
-        security_protocol='SASL_SSL',
-        sasl_mechanism='OAUTHBEARER',
-        sasl_oauth_token_provider=token_provider,
-        client_id='client1',
-        api_version=(2, 6, 1), 
-        request_timeout_ms=30000,
-        retry_backoff_ms=500,
-    )
+if __name__ == "__main__":
+    # Replace with your MSK Cluster ARN and topic name
+    MSK_CLUSTER_ARN = "arn:aws:kafka:ap-southeast-1:874957933250:cluster/imagecaching/3311efe7-9e54-4db5-b0e9-8a9820bcc9e4-s1"
+    TOPIC_NAME = "test-topic"
 
-    # Define the topic details
-    topic_name = "mytopic"
-    new_topic = [NewTopic(name=topic_name, num_partitions=1, replication_factor=1)]
+    # Sample message
+    MESSAGE = {"key": "value"}
 
-    # Check if the topic already exists
-    existing_topics = admin_client.list_topics()
-
-    if topic_name not in existing_topics:
-        admin_client.create_topics(new_topics=new_topic)
-        print(f"Topic '{topic_name}' created successfully.")
-    else:
-        print(f"Topic '{topic_name}' already exists.")
-
-except Exception as e:
-    print(f"Error during Kafka operation: {e}")
+    # Fetch bootstrap servers and produce a message
+    bootstrap_servers = get_msk_bootstrap_servers(MSK_CLUSTER_ARN)
+    produce_message(bootstrap_servers, TOPIC_NAME, MESSAGE)
