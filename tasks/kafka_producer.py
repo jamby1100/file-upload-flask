@@ -1,12 +1,6 @@
-import logging
-from kafka import KafkaProducer, KafkaException
+from kafka import KafkaProducer
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 import json
-import time
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # AWS region where MSK cluster is located
 region = 'ap-southeast-1'
@@ -15,13 +9,13 @@ region = 'ap-southeast-1'
 class MSKTokenProvider:
     def token(self):
         token, _ = MSKAuthTokenProvider.generate_auth_token(region)
-        logger.info(f"Token generated: {token[:10]}...")  # Log first 10 chars of token
+        
+        print(token,'token generated')
         return token
 
 # Create an instance of MSKTokenProvider class
 tp = MSKTokenProvider()
-logger.info(f"Token provider created: {tp}")
-
+print(tp,'tpp')
 # Kafka producer configuration
 producer = KafkaProducer(
     bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
@@ -34,23 +28,6 @@ producer = KafkaProducer(
     api_version=(2, 8, 0),
 )
 
-# Check if the producer is connected
-max_retries = 5
-retries = 0
-
-while retries < max_retries:
-    try:
-        # Test the connection by sending a dummy message (this won't affect your actual operations)
-        producer.partitions_for('image-resize')
-        logger.info("Successfully connected to the Kafka broker!")
-        break
-    except KafkaException as e:
-        retries += 1
-        logger.error(f"Connection failed, retrying {retries}/{max_retries}: {e}")
-        time.sleep(5)
-else:
-    logger.error("Failed to connect to the Kafka broker after multiple retries.")
-
 # Function to send resize task to Kafka
 def send_resize_task(file_path, width, height):
     # Construct the task payload
@@ -61,9 +38,6 @@ def send_resize_task(file_path, width, height):
     }
     
     # Send the task to Kafka
-    try:
-        producer.send('image-resize', task)
-        producer.flush()  # Ensure the message is sent
-        logger.info(f"Resize task sent: {task}")
-    except KafkaException as e:
-        logger.error(f"Failed to send resize task: {e}")
+    producer.send('image-resize', task)
+    producer.flush()  # Ensure the message is sent
+    print(f"Resize task sent: {task}")
