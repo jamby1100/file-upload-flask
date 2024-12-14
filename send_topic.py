@@ -16,10 +16,11 @@ tp = MSKTokenProvider()
 # Initialize KafkaAdminClient with required configurations
 admin_client = KafkaAdminClient(
     bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-    security_protocol='PLAINTEXT',
-    # sasl_mechanism='OAUTHBEARER',
-    # sasl_oauth_token_provider=tp,
+    security_protocol='SASL_SSL',
+    sasl_mechanism='OAUTHBEARER',
+    sasl_oauth_token_provider=tp,
     client_id='client1',
+     api_version=(2, 6, 1),
 )
 
 # create topic
