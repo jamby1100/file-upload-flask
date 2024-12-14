@@ -1,34 +1,42 @@
-from kafka.admin import KafkaAdminClient, NewTopic
+from kafka import KafkaProducer
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
+import json
 
 # AWS region where MSK cluster is located
-region= 'ap-southeast-1'
+region = 'ap-southeast-1'
 
 # Class to provide MSK authentication token
-class MSKTokenProvider():
+class MSKTokenProvider:
     def token(self):
         token, _ = MSKAuthTokenProvider.generate_auth_token(region)
+        
+        print(token, 'token generated')
         return token
 
 # Create an instance of MSKTokenProvider class
 tp = MSKTokenProvider()
 
-# Initialize KafkaAdminClient with required configurations
-admin_client = KafkaAdminClient(
+# Kafka producer configuration
+producer = KafkaProducer(
     bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    retry_backoff_ms=500,
+    request_timeout_ms=30000,
     security_protocol='SASL_SSL',
     sasl_mechanism='OAUTHBEARER',
     sasl_oauth_token_provider=tp,
-    client_id='client1',
-     api_version=(2, 6, 1),
+    api_version=(2, 8, 0),
 )
 
-# create topic
-topic_name="mytopic"
-topic_list =[NewTopic(name=topic_name, num_partitions=1, replication_factor=2)]
-existing_topics = admin_client.list_topics()
-if(topic_name not in existing_topics):
-    admin_client.create_topics(topic_list)
-    print("Topic has been created")
-else:
-    print("topic already exists!. List of topics are:" + str(existing_topics))
+# Function to send a simple message to Kafka
+def send_simple_message():
+    # Construct a simple message
+    message = {"message": "Hello, Kafka!"}
+    
+    # Send the message to Kafka
+    producer.send('your-topic-name', message)
+    producer.flush()  # Ensure the message is sent
+    print(f"Simple message sent: {message}")
+
+# Call the function to send a simple message
+send_simple_message()
