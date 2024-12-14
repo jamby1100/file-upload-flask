@@ -17,6 +17,7 @@ producer = KafkaProducer(
     sasl_mechanism='OAUTHBEARER',
     sasl_oauth_token_provider=tp,
     client_id=socket.gethostname(),
+    api_version=(2, 8, 0),
 )
 
 topic = "your-topic-name"
