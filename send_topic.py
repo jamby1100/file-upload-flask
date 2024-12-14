@@ -18,14 +18,19 @@ tp = MSKTokenProvider()
 
 # Kafka producer configuration
 producer = KafkaProducer(
-    bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-    retry_backoff_ms=500,
-    request_timeout_ms=30000,
-    security_protocol='SASL_SSL',
-    sasl_mechanism='OAUTHBEARER',
-    sasl_oauth_token_provider=tp,
-    api_version=(2, 8, 0),
+    # bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
+    # value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    # retry_backoff_ms=500,
+    # request_timeout_ms=30000,
+    # security_protocol='SASL_SSL',
+    # sasl_mechanism='OAUTHBEARER',
+    # sasl_oauth_token_provider=tp,
+    # api_version=(2, 8, 0),
+     bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
+        security_protocol='SASL_SSL',
+        sasl_mechanism='OAUTHBEARER',
+        sasl_oauth_token_provider=tp,
+        client_id="my.kafka.client.unique.id",
 )
 
 # Function to send a simple message to Kafka
