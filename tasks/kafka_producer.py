@@ -4,47 +4,66 @@ from PIL import Image
 import json
 import os
 
-# AWS MSK IAM Token Provider
-msk_auth = MSKAuthTokenProvider()
 
-# Kafka configuration with IAM authentication
-conf = {
+# AWS Region where the MSK cluster is located
+AWS_REGION = 'ap-southeast-1'
+
+# Kafka configuration
+class MSKTokenProvider:
+    def token(self):
+        token, _ = MSKAuthTokenProvider.generate_auth_token(AWS_REGION)
+        return token
+
+
+# Create an instance of the MSK token provider
+token_provider = MSKTokenProvider()
+
+consumer_config = {
     'bootstrap.servers': 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-    'group.id': 'image-resize-consumer',
-    'auto.offset.reset': 'earliest',
-    'enable.auto.commit': True,  # Auto commit offsets
     'security.protocol': 'SASL_SSL',
-    'sasl.mechanisms': 'AWS_MSK_IAM',
-    'sasl.username': msk_auth.get_username(),
-    'sasl.password': msk_auth.get_password(),
+    'sasl.mechanism': 'OAUTHBEARER',
+    'sasl.oauth.token.provider': token_provider,
+    'group.id': 'image-resize-consumer',
+    'auto.offset.reset': 'earliest'
 }
 
-consumer = Consumer(conf)
+consumer = Consumer(consumer_config)
+
 
 def resize_image(file_path, width, height):
+    """
+    Resizes an image to the specified width and height.
+
+    Args:
+        file_path (str): Path to the image file.
+        width (int): Desired width of the resized image.
+        height (int): Desired height of the resized image.
+
+    Returns:
+        str: Path to the resized image if successful, None otherwise.
+    """
+    resized_path = file_path.replace(".", "_resized.")
     try:
-        if not os.path.exists(file_path):
-            print(f"File not found: {file_path}")
-            return None
-
-        base, ext = os.path.splitext(file_path)
-        resized_path = f"{base}_resized{ext}"
-
         with Image.open(file_path) as img:
             img = img.resize((width, height))
             img.save(resized_path)
-
         return resized_path
     except Exception as e:
         print(f"Error resizing image: {e}")
         return None
 
+
 def consume_resize_tasks():
-    consumer.subscribe(['image-resize'])
+    """
+    Consumes image resize tasks from a Kafka topic and processes them.
+    """
+    topic_name = "image-resize"
+    consumer.subscribe([topic_name])
+    print(f"Subscribed to topic '{topic_name}'. Waiting for resize tasks...")
 
     try:
         while True:
-            msg = consumer.poll(timeout=5.0)
+            msg = consumer.poll(timeout=1.0)
             if msg is None:
                 continue
             if msg.error():
@@ -53,6 +72,7 @@ def consume_resize_tasks():
                 else:
                     raise KafkaException(msg.error())
             else:
+                # Decode the message and process the task
                 try:
                     task = json.loads(msg.value().decode('utf-8'))
                     file_path = task.get('file_path')
@@ -60,18 +80,28 @@ def consume_resize_tasks():
                     height = task.get('height')
 
                     if not file_path or not width or not height:
-                        print(f"Invalid task received: {task}")
+                        print(f"Invalid task data: {task}")
                         continue
 
-                    print(f"Received task to resize image: {file_path}, {width}x{height}")
-                    result = resize_image(file_path, width, height)
-                    if result:
-                        print(f"Resized image saved to {result}")
+                    print(f"Processing resize task: {task}")
+                    resized_image_path = resize_image(file_path, width, height)
+
+                    if resized_image_path:
+                        print(f"Resized image saved at {resized_image_path}")
                     else:
                         print(f"Failed to resize image: {file_path}")
-                except json.JSONDecodeError as e:
-                    print(f"Invalid JSON in message: {e}")
+                except json.JSONDecodeError:
+                    print(f"Failed to decode message: {msg.value()}")
+
     except KeyboardInterrupt:
-        print("Terminating consumer...")
+        print("Consumer interrupted.")
     finally:
         consumer.close()
+
+
+# Main entry point
+if __name__ == "__main__":
+    try:
+        consume_resize_tasks()
+    except Exception as e:
+        print(f"Error occurred: {e}")
