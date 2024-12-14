@@ -38,4 +38,3 @@ def send_resize_task(file_path, width, height):
     producer.send('image-resize', task)
     producer.flush()  # Ensure the message is sent
     print(f"Resize task sent: {task}")
-
