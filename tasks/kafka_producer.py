@@ -22,7 +22,6 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode('utf-8'),
     retry_backoff_ms=500,
     request_timeout_ms=30000,
-    metadata_fetch_timeout_ms=120000,  
     security_protocol='SASL_SSL',
     sasl_mechanism='OAUTHBEARER',
     sasl_oauth_token_provider=tp,
