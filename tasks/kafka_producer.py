@@ -16,16 +16,17 @@ class MSKTokenProvider:
 # Create an instance of MSKTokenProvider class
 tp = MSKTokenProvider()
 print(tp,'tpp')
+
 # Kafka producer configuration
 producer = KafkaProducer(
     bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
     value_serializer=lambda v: json.dumps(v).encode('utf-8'),
     retry_backoff_ms=500,
     request_timeout_ms=30000,
-    security_protocol='PLAINTEXT',
+    security_protocol='SASL_SSL',  # Using SASL_SSL for secure connections
+    sasl_mechanism='OAUTHBEARER',  # Using OAuthBearer for IAM authentication
+    sasl_oauth_token_provider=tp,  # MSK authentication token provider
     api_version=(2, 8, 0),
-    # sasl_mechanism='OAUTHBEARER',
-    sasl_oauth_token_provider=tp,
 )
 
 # Function to send resize task to Kafka
