@@ -1,31 +1,34 @@
-from confluent_kafka import AdminClient, NewTopic
+from kafka.admin import KafkaAdminClient, NewTopic
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 
-# MSK authentication token provider class
-class MSKTokenProvider:
+# AWS region where MSK cluster is located
+region= 'ap-southeast-1'
+
+# Class to provide MSK authentication token
+class MSKTokenProvider():
     def token(self):
-        token, _ = MSKAuthTokenProvider.generate_auth_token('ap-southeast-1')
+        token, _ = MSKAuthTokenProvider.generate_auth_token(region)
         return token
 
 # Create an instance of MSKTokenProvider class
 tp = MSKTokenProvider()
 
-# Kafka Admin Client Configuration
-admin_client = AdminClient({
-    'bootstrap.servers': 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-    'security.protocol': 'SASL_SSL',
-    'sasl.mechanism': 'OAUTHBEARER',
-    'sasl.oauthbearer.token': tp.token()
-})
+# Initialize KafkaAdminClient with required configurations
+admin_client = KafkaAdminClient(
+    bootstrap_servers='boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
+    security_protocol='SASL_SSL',
+    sasl_mechanism='OAUTHBEARER',
+    sasl_oauth_token_provider=tp,
+    client_id='client1',
+     api_version=(2, 6, 1),
+)
 
-# Create a topic
-new_topic = NewTopic("your-topic-name", num_partitions=3, replication_factor=2)
-fs = admin_client.create_topics([new_topic])
-
-# Check if topic creation was successful
-for topic, f in fs.items():
-    try:
-        f.result()  # Will raise an exception if topic creation failed
-        print(f"Topic {topic} created successfully")
-    except Exception as e:
-        print(f"Failed to create topic {topic}: {e}")
+# create topic
+topic_name="mytopic"
+topic_list =[NewTopic(name=topic_name, num_partitions=1, replication_factor=2)]
+existing_topics = admin_client.list_topics()
+if(topic_name not in existing_topics):
+    admin_client.create_topics(topic_list)
+    print("Topic has been created")
+else:
+    print("topic already exists!. List of topics are:" + str(existing_topics))
