@@ -21,13 +21,13 @@ producer = KafkaProducer(
 )
 
 topic = "your-topic-name"
-while True:
-    try:
-        inp=input(">")
-        producer.send(topic, inp.encode())
-        producer.flush()
-        print("Produced!")
-    except Exception:
-        print("Failed to send message:", e)
+# while True:
+try:
+    inp=input(">")
+    producer.send(topic, inp.encode())
+    producer.flush()
+    print("Produced!")
+except Exception:
+    print("Failed to send message:", e)
 
 producer.close()
