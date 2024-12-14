@@ -1,14 +1,14 @@
-from confluent_kafka import Consumer, KafkaException, KafkaError
+from confluent_kafka import Consumer, Producer, KafkaException, KafkaError
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 from PIL import Image
 import json
-import os
 
 
-# AWS Region where the MSK cluster is located
+# AWS Region where MSK cluster is located
 AWS_REGION = 'ap-southeast-1'
+BROKERS = 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098' 
 
-# Kafka configuration
+# Class for providing MSK IAM authentication token
 class MSKTokenProvider:
     def token(self):
         token, _ = MSKAuthTokenProvider.generate_auth_token(AWS_REGION)
@@ -16,31 +16,47 @@ class MSKTokenProvider:
 
 
 # Create an instance of the MSK token provider
-token_provider = MSKTokenProvider()
+tp = MSKTokenProvider()
 
+# Kafka Producer Configuration
+producer_config = {
+    'bootstrap.servers': BROKERS,
+    'security.protocol': 'SASL_SSL',
+    'sasl.mechanism': 'OAUTHBEARER',
+    'sasl.oauth.token.provider': tp,
+    'linger.ms': 10,
+    'retry.backoff.ms': 500,
+    'request.timeout.ms': 20000,
+    'value.serializer': lambda v: json.dumps(v).encode('utf-8')
+}
+
+producer = Producer(producer_config)
+
+# Kafka Consumer Configuration
 consumer_config = {
-    'bootstrap_servers': 'boot-i0fqmu70.c1.kafka-serverless.ap-southeast-1.amazonaws.com:9098',
-    'security_protocol': 'SASL_SSL',
-    'sasl_mechanism': 'OAUTHBEARER',
-    'sasl_oauth_token_provider': token_provider,
+    'bootstrap.servers': BROKERS,
+    'security.protocol': 'SASL_SSL',
+    'sasl.mechanism': 'OAUTHBEARER',
+    'sasl.oauth.token.provider': tp,
     'group.id': 'image-resize-consumer',
-    # 'auto.offset.reset': 'earliest'
+    'auto.offset.reset': 'earliest'
 }
 
 consumer = Consumer(consumer_config)
 
 
+# Image Resizing Function
 def resize_image(file_path, width, height):
     """
-    Resizes an image to the specified width and height.
+    Resizes an image to the specified dimensions.
 
     Args:
         file_path (str): Path to the image file.
-        width (int): Desired width of the resized image.
-        height (int): Desired height of the resized image.
+        width (int): Desired width.
+        height (int): Desired height.
 
     Returns:
-        str: Path to the resized image if successful, None otherwise.
+        str: Path to the resized image if successful; otherwise None.
     """
     resized_path = file_path.replace(".", "_resized.")
     try:
@@ -53,9 +69,34 @@ def resize_image(file_path, width, height):
         return None
 
 
+# Kafka Producer Function
+def send_resize_task(file_path, width, height):
+    """
+    Sends a resize task to the Kafka topic.
+
+    Args:
+        file_path (str): Path to the image file.
+        width (int): Desired width of the resized image.
+        height (int): Desired height of the resized image.
+    """
+    topic_name = "image-resize"
+    task = {
+        "file_path": file_path,
+        "width": width,
+        "height": height
+    }
+    try:
+        producer.produce(topic_name, value=json.dumps(task))
+        producer.flush()
+        print(f"Resize task sent: {task}")
+    except Exception as e:
+        print(f"Failed to send resize task: {e}")
+
+
+# Kafka Consumer Function
 def consume_resize_tasks():
     """
-    Consumes image resize tasks from a Kafka topic and processes them.
+    Consumes image resize tasks from Kafka and processes them.
     """
     topic_name = "image-resize"
     consumer.subscribe([topic_name])
@@ -72,7 +113,6 @@ def consume_resize_tasks():
                 else:
                     raise KafkaException(msg.error())
             else:
-                # Decode the message and process the task
                 try:
                     task = json.loads(msg.value().decode('utf-8'))
                     file_path = task.get('file_path')
@@ -99,9 +139,12 @@ def consume_resize_tasks():
         consumer.close()
 
 
-# Main entry point
+# Main Execution
 if __name__ == "__main__":
-    try:
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "produce":
+        # Example: Send a resize task
+        send_resize_task("/tmp/example.jpg", 200, 200)
+    else:
+        # Default: Start the consumer
         consume_resize_tasks()
-    except Exception as e:
-        print(f"Error occurred: {e}")
