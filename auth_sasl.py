@@ -28,6 +28,6 @@ try:
     producer.flush()
     print("Produced!")
 except Exception:
-    print("Failed to send message:", e)
+    print("Failed to send message:")
 
 producer.close()
