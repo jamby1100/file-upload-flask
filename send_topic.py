@@ -1,4 +1,4 @@
-from confluent_kafka import AdminClient, NewTopic
+from confluent_kafka.admin import AdminClient, NewTopic
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 
 # AWS region where MSK cluster is located
