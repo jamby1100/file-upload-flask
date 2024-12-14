@@ -20,6 +20,7 @@ admin_client = KafkaAdminClient(
     sasl_mechanism='OAUTHBEARER',
     sasl_oauth_token_provider=tp,
     client_id='client1',
+    api_version=(2, 8, 0),
 )
 
 # create topic
