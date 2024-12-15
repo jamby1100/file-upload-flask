@@ -95,7 +95,7 @@ class UploadFile:
                 psql_instance.close()
                 
                 original_img_url = url_for('download_file', name=filename)
-                resized_img_url = url_for('download_file', name=resized_path)
+                # resized_img_url = url_for('download_file', name=resized_path)
 
             if ENV_MODE == "backend":
                 return {
