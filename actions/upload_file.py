@@ -49,12 +49,12 @@ class UploadFile:
                 image_mongo_id = result.inserted_id
 
                 # Trigger Celery task and wait for the resized image URL
-                task = resize_and_upload_image.delay(file_path, width=200, height=200)
+                task = resize_and_upload_image.delay({"file_path": file_path, "file_name": filename}, width=200, height=200)
                 resized_path = task.get()  # Wait synchronously for the task to complete
 
                 print ('resize-path',resized_path)
                 
-                #send resize path kafkha
+                # send resize path kafkha
                 result =  send_msg_async(resized_path)
                 
                 print ('message-sent?',result)
@@ -65,6 +65,7 @@ class UploadFile:
                     message_dict = json.loads(message)
                     print('receive-path-data', message_dict)
                     print('mongo-id',image_mongo_id)
+                    
                     # Update MongoDB document with resized image URL
                     collection.update_one(
                         {"_id": ObjectId(image_mongo_id)},
