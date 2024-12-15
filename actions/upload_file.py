@@ -66,12 +66,12 @@ class UploadFile:
                     # fetch message kafka
                     message = consume_message("your-topic-name", timeout=5.0)
                     
-                    parsed_data = json.loads(message)
-                    new_file_path = parsed_data.get("file-path")
-                    process_image_mongo_id = parsed_data.get("image_mongo_id") 
+                    # parsed_data = json.loads(message)
+                    new_file_path = message.get("file-path")
+                    # process_image_mongo_id = parsed_data.get("image_mongo_id") 
                     
                     print (new_file_path,"receive filepath")
-                    print (process_image_mongo_id,"process_image_mongo_id")
+                    # print (process_image_mongo_id,"process_image_mongo_id")
                     # Update MongoDB document with resized image URL
                     # collection.update_one(
                     #     {"_id": ObjectId(image_mongo_id)},
