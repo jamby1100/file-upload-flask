@@ -56,7 +56,7 @@ class UploadFile:
                 #send resize path kafkha
                 send_msg_async(resized_path)
                 
-                print ('message-sent?',send_msg_async)
+                print ('message-sent?',send_msg_async.get())
                 
                 # Update MongoDB document with resized image URL
                 collection.update_one(
