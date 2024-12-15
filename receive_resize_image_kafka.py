@@ -71,7 +71,7 @@ def resize_and_upload_image(file_path,image_mongo_id, width, height):
         # update mongodb
         update_mongodb(image_mongo_id, final_path)
         
-        return "Updated Successfully"
+        return final_path
 
     except Exception as e:
         raise Exception(f"Image resizing failed: {e}")
