@@ -8,7 +8,7 @@ def resize_and_upload_image(file_path, width, height):
         with Image.open(file_path) as img:
             img = img.resize((width, height))
             img.save(resized_path)
-        final_path = resized_path.lstrip('/tmp/')
+        final_path = resized_path.lstrip('/home/ec2-user/efs')
         return final_path
 
     except Exception as e:
