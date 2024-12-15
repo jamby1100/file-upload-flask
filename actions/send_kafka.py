@@ -22,7 +22,7 @@ producer = Producer({
 def send_msg_async(msg):
     # print("Sending message")
     try:
-        msg_json_str = str({"data": json.dumps(msg)})
+        msg_json_str = str(json.dumps(msg))
         producer.produce(
             'your-topic-name',
             msg_json_str
