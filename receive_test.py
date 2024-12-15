@@ -1,16 +1,17 @@
 from confluent_kafka import Consumer
 
 consumer = Consumer({
-    'bootstrap.servers': 'b-3.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,b-1.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,b-2.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092',
-    'socket.timeout.ms': 1500,  # Increased to avoid blocking
-    'fetch.wait.max.ms': 500,  # Default value
-    'api.version.request': 'false',  # Keep disabled for older brokers
-    'broker.version.fallback': '0.9.0',  # Matches your broker version
-    'message.max.bytes': 1000000000,  # Message size limit
-    'group.id': 'mygroup',  # Consumer group ID
-    'auto.offset.reset': 'earliest',  # Start consuming from earliest offset
-    'session.timeout.ms': 30000,  # Session timeout (45 seconds)
-    'max.poll.interval.ms': 30000,  # Lower than session.timeout.ms for compatibility
+    'bootstrap.servers': 'b-3.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,'
+                         'b-1.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,'
+                         'b-2.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092',
+    'socket.timeout.ms': 100,
+    'api.version.request': 'false',
+    'broker.version.fallback': '0.9.0',
+    'message.max.bytes': 1000000000,
+    'group.id': 'mygroup',
+    'auto.offset.reset': 'earliest',
+    'session.timeout.ms': 10000,  # Default is usually 10000ms (10 seconds)
+    'max.poll.interval.ms': 300000  # Must be >= session.timeout.ms
 })
 
 consumer.subscribe(['your-topic-name'])
