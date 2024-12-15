@@ -5,6 +5,10 @@ import json
 @celery.task
 def resize_and_upload_image(file_obj_raw, width, height):
     file_obj = json.loads(file_obj_raw)
+
+    print("file_obj", file_obj)
+    print("file_obj_raw", file_obj_raw)
+
     file_path = file_obj["file_path"]
     file_name = file_obj["file_name"]
 
