@@ -7,6 +7,7 @@ from db.mongodb.mongodb import MongoDB
 from db.postgresql.postgresql import PostgreSQL
 from tasks.resize_image import resize_and_upload_image
 from actions.send_kafka import send_msg_async
+from actions.receive_kafka import consume_message
 from helpers import Helper
 from bson import ObjectId
 
@@ -57,12 +58,22 @@ class UploadFile:
                 result =  send_msg_async(resized_path)
                 
                 print ('message-sent?',result)
+                if result == "Message sent successfully.":
+                    receive_message= consume_message
+                    
+                    print('receive-path',receive_message)
+                    # Update MongoDB document with resized image URL
+                    collection.update_one(
+                        {"_id": ObjectId(image_mongo_id)},
+                        {"$set": {"resized_image_url": resized_path}}
+                    )
+                    
+                    print("The message was sent")
+                else:
+                    print("An error occurred:", result)
+                    
                 
-                # Update MongoDB document with resized image URL
-                collection.update_one(
-                    {"_id": ObjectId(image_mongo_id)},
-                    {"$set": {"resized_image_url": resized_path}}
-                )
+                
 
                 client.close()
 
