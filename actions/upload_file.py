@@ -48,12 +48,8 @@ class UploadFile:
 
                 result = collection.insert_one({"original_image_url": filename})
                 image_mongo_id = result.inserted_id
-                # Trigger Celery task and wait for the resized image URL
-                # task = resize_and_upload_image.delay(file_path, width=200, height=200)
-                # resized_path = task.get()  # Wait synchronously for the task to complete
-
-                # print ('resize-path',resized_path)
-                # print(result,"raw-file")
+              
+                # parse objectid of mongo id
                 match = re.search(r"ObjectId\('([a-f0-9]+)'\)", str(result))
                 if match:
                      object_id = match.group(1)
@@ -63,28 +59,7 @@ class UploadFile:
                 result =  send_msg_async({"file-path": file_path, "image_mongo_id": object_id})
                 
                 print ('message-sent?',result)
-                # if result == "Message sent successfully.":
-                #     # fetch message kafka
-                #     message = consume_message("your-topic-name", timeout=5.0)
-                    
-                #     new_file_path = message.get("file-path")
-                #     process_image_mongo_id = message.get("image_mongo_id") 
-                    
-                #     print (new_file_path,"receive filepath")
-                #     print (process_image_mongo_id,"process_image_mongo_id")
-                #     # Update MongoDB document with resized image URL
-                #     # collection.update_one(
-                #     #     {"_id": ObjectId(process_image_mongo_id)},
-                #     #     {"$set": {"resized-image-path": new_file_path, "image_mongo_id": process_image_mongo_id}}  
-                #     # )
-                    
-                #     # print("Image resize and file path updated")
-                # else:
-                #     print("An error occurred:", result)
-                    
-                
-                
-
+ 
                 client.close()
 
                 stock_count=int(request.form.get('initial_stock_count'))
@@ -102,7 +77,6 @@ class UploadFile:
                 psql_instance.close()
                 
                 original_img_url = url_for('download_file', name=filename)
-                # resized_img_url = url_for('download_file', name=new_file_path)
 
             if ENV_MODE == "backend":
                 return {
@@ -119,7 +93,5 @@ class UploadFile:
                    
                 </html>
                 '''
-            #  <h1>{new_file_path} 200x200</h1>
-            #         <img src="{resized_img_url}" alt="Resized Image"></img>
             redirect()
         return render_template('upload_image.html')
