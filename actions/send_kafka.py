@@ -29,7 +29,9 @@ def send_msg_async(msg):
         )
         print('sent-message', msg_json_str)
         producer.flush()
+        return "Message sent successfully."
     except Exception as ex:
-        print("Error : ", ex)
+        print("Error:", ex)
+        return f"Failed to send message: {ex}"
         
 send_msg_async(data)
