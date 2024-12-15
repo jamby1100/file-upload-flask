@@ -5,6 +5,7 @@ consumer = Consumer({
                          'b-1.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,'
                          'b-2.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092',
     'socket.timeout.ms': 100,
+      'fetch.wait.max.ms':90,
     'api.version.request': 'false',
     'broker.version.fallback': '0.9.0',
     'message.max.bytes': 1000000000,
