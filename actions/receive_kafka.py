@@ -29,11 +29,11 @@ def consume_message(self,topic_name='your-topic-name', timeout=5.0):
         else:
             message_value = msg.value().decode('utf-8')
             cleaned_message = message_value.strip("'")
-            parsed_data = json.loads(cleaned_message) 
-            inner_json = json.loads(parsed_data)
-            file_path = inner_json.get("file-path")
+            # parsed_data = json.loads(cleaned_message) 
+            # inner_json = json.loads(parsed_data)
+            # file_path = inner_json.get("file-path")
             # parsed_data = json.loads(message_value)
-            print("Received message:",file_path)
+            print("Received message:",cleaned_message)
             
             return message_value
     finally:
