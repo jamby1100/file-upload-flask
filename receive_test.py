@@ -13,13 +13,28 @@ consumer = Consumer({
     'auto.offset.reset': 'earliest'
 })
 
+def consume_message(topic_name='your-topic-name', timeout=5):
+  
+    consumer.subscribe([topic_name])
 
+    try:
+        msg = consumer.poll(timeout)
+        if msg is None:
+            print(f"No message received within {timeout} seconds.")
+            return None
 
-consumer.subscribe(['your-topic-name'])
+        if msg.error():
+            print(f"Error in message: {msg.error()}")
+            return None
 
-msg = consumer.poll(5)
+        decoded_message = msg.value().decode('utf-8')
+        print(f"Received message: {decoded_message}")
+        return decoded_message
 
-    
-print('Received message: {}'.format(msg.value().decode('utf-8')))
+    except Exception as e:
+        print(f"Error consuming message: {e}")
+        return None
 
-consumer.close()
+    finally:
+        consumer.close()
+        print("Consumer closed.")

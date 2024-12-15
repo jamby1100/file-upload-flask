@@ -54,13 +54,13 @@ class UploadFile:
 
                 # Send the resize task to Kafka (asynchronously)
                 send_resize_task(file_path, width=200, height=200)
-
+                
                 # Update MongoDB document with placeholder resized image URL initially (optional)
                 collection.update_one(
                     {"_id": ObjectId(image_mongo_id)},
                     {"$set": {"resized_image_url": "processing..."}}
                 )
-
+                
                 client.close()
 
                 stock_count = int(request.form.get('initial_stock_count'))
