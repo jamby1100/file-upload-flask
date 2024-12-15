@@ -1,8 +1,5 @@
 import json
-import time
-from time import time
 from confluent_kafka import Producer
-from PIL import Image
 
 producer = Producer({
     'bootstrap.servers': 'b-3.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,b-1.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,b-2.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092',
@@ -12,17 +9,11 @@ producer = Producer({
     'message.max.bytes': 1000000000
 })
 
-
-
 data = {"name": "xyz", "email": "xyz@"}
 
-
-
-
 def send_msg_async(msg):
-    # print("Sending message")
     try:
-        msg_json_str = str(json.dumps(msg))
+        msg_json_str = str({ json.dumps(msg)})
         producer.produce(
             'your-topic-name',
             msg_json_str
@@ -33,5 +24,5 @@ def send_msg_async(msg):
     except Exception as ex:
         print("Error:", ex)
         return f"Failed to send message: {ex}"
-        
-send_msg_async(data)
+
+
