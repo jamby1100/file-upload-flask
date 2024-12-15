@@ -1,6 +1,8 @@
 from confluent_kafka import Consumer
+from PIL import Image
+import json 
 
-def consume_message(topic_name='your-topic-name', timeout=5.0):
+def consume_message(self,topic_name='your-topic-name', timeout=5.0):
     consumer = Consumer({
         'bootstrap.servers': 'b-3.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,' 
                              'b-1.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,' 
@@ -27,7 +29,10 @@ def consume_message(topic_name='your-topic-name', timeout=5.0):
             return f"Consumer error: {msg.error()}"
         else:
             message_value = msg.value().decode('utf-8')
-            print(f"Received message: {message_value}")
+            parsed_data = json.loads(message_value)
+            file_path = parsed_data["file-path"]
+            print(f"Received message: json.loads(input_data){message_value}")
+            print(file_path,'receive path to process')
             return message_value
     finally:
         consumer.close()
