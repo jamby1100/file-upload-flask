@@ -47,7 +47,7 @@ class UploadFile:
 
                 result = collection.insert_one({"original_image_url": filename})
                 image_mongo_id = result.inserted_id
-                print (filename,"filename")
+                print (result,"file")
                 # Trigger Celery task and wait for the resized image URL
                 # task = resize_and_upload_image.delay(file_path, width=200, height=200)
                 # resized_path = task.get()  # Wait synchronously for the task to complete
