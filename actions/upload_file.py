@@ -62,7 +62,7 @@ class UploadFile:
                 # # send resize path kafkha
                 result =  send_msg_async({"file-path": file_path, "image_mongo_id": object_id})
                 
-                # print ('message-sent?',result)
+                print ('message-sent?',result)
                 # if result == "Message sent successfully.":
                 #     # fetch message kafka
                 #     message = consume_message("your-topic-name", timeout=5.0)
