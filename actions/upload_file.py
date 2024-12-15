@@ -55,7 +55,7 @@ class UploadFile:
                 print ('resize-path',resized_path)
                 
                 #send resize path kafkha
-                result =  send_msg_async(resized_path)
+                result =  send_msg_async(resized_path,image_mongo_id)
                 
                 print ('message-sent?',result)
                 if result == "Message sent successfully.":
