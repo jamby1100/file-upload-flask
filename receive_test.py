@@ -19,7 +19,7 @@ consumer.subscribe(['your-topic-name'])
 
 msg = consumer.poll(5)
 
-    
-print('Received message: {}'.format(msg.value().decode('utf-8')))
+print(msg,'raw message') 
+# print('Received message: {}'.format(msg.value().decode('utf-8')))
 
 consumer.close()
