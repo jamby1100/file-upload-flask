@@ -42,8 +42,7 @@ def consume_message(self,topic_name='your-topic-name', timeout=5.0):
             print("Received message:",file_path)
             task = resize_and_upload_image(file_path,image_mongo_id, width=200, height=200)
             
-            print(task,"path resize")
-            return cleaned_message
+            return {"file-path": task, "image_mongo_id": "675f05820563d8c86b272223"}
     finally:
         consumer.close()
 
