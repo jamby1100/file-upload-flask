@@ -10,6 +10,7 @@ from actions.send_kafka import send_msg_async
 from actions.receive_kafka import consume_message
 from helpers import Helper
 from bson import ObjectId
+import re
 
 ENV_MODE = os.getenv("ENV_MODE")
 class UploadFile:
@@ -53,6 +54,10 @@ class UploadFile:
 
                 # print ('resize-path',resized_path)
                 print(result,"raw-file")
+                match = re.search(r"ObjectId\('([a-f0-9]+)'\)", str(result))
+                if match:
+                     object_id = match.group(1)
+                     print(object_id,'object_id')
                 # send resize path kafkha
                 # result =  send_msg_async({"file-path": file_path, "image_mongo_id": image_mongo_id})
                 
