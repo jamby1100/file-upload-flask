@@ -9,7 +9,7 @@ consumer = Consumer({
     'message.max.bytes': 1000000000,  # Message size limit
     'group.id': 'mygroup',  # Consumer group ID
     'auto.offset.reset': 'earliest',  # Start consuming from earliest offset
-    'session.timeout.ms': 45000,  # Session timeout (45 seconds)
+    'session.timeout.ms': 30000,  # Session timeout (45 seconds)
     'max.poll.interval.ms': 30000,  # Lower than session.timeout.ms for compatibility
 })
 
