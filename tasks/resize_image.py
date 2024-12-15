@@ -1,8 +1,10 @@
 from PIL import Image
 from core.celery_app import celery
+import json
 
 @celery.task
-def resize_and_upload_image(file_obj, width, height):
+def resize_and_upload_image(file_obj_raw, width, height):
+    file_obj = json.loads(file_obj_raw)
     file_path = file_obj["file_path"]
     file_name = file_obj["file_name"]
 
