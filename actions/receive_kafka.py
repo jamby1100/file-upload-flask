@@ -38,9 +38,8 @@ def consume_message(self,topic_name='your-topic-name', timeout=5.0):
             # parsed_data = json.loads(message_value)
             print("Received message:",file_path)
             task = resize_and_upload_image(file_path, width=200, height=200)
-            resized_path = task.get()  # Wait synchronously for the task to complete
             
-            print(resized_path,"path resize")
+            print(task,"path resize")
             return cleaned_message
     finally:
         consumer.close()
