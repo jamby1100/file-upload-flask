@@ -52,28 +52,28 @@ class UploadFile:
                 # resized_path = task.get()  # Wait synchronously for the task to complete
 
                 # print ('resize-path',resized_path)
-                print(file_path,"raw-file")
+                print(result,"raw-file")
                 # send resize path kafkha
-                result =  send_msg_async({"file-path": file_path, "image_mongo_id": image_mongo_id})
+                # result =  send_msg_async({"file-path": file_path, "image_mongo_id": image_mongo_id})
                 
-                print ('message-sent?',result)
-                if result == "Message sent successfully.":
-                    # fetch message kafka
-                    message = consume_message("your-topic-name", timeout=5.0)
-                    print (message,"receive filepath")
-                    # message_dict = json.loads(message)
-                    # print('receive-path-data', message_dict)
-                    # print('mongo-id',image_mongo_id)
+                # print ('message-sent?',result)
+                # if result == "Message sent successfully.":
+                #     # fetch message kafka
+                #     message = consume_message("your-topic-name", timeout=5.0)
+                #     print (message,"receive filepath")
+                #     # message_dict = json.loads(message)
+                #     # print('receive-path-data', message_dict)
+                #     # print('mongo-id',image_mongo_id)
                     
-                    # Update MongoDB document with resized image URL
-                    # collection.update_one(
-                    #     {"_id": ObjectId(image_mongo_id)},
-                    #     {"$set": {"resized_image_url": message_dict}}
-                    # )
+                #     # Update MongoDB document with resized image URL
+                #     # collection.update_one(
+                #     #     {"_id": ObjectId(image_mongo_id)},
+                #     #     {"$set": {"resized_image_url": message_dict}}
+                #     # )
                     
-                    # print("The message was sent")
-                else:
-                    print("An error occurred:", result)
+                #     # print("The message was sent")
+                # else:
+                #     print("An error occurred:", result)
                     
                 
                 
