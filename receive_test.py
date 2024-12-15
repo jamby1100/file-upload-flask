@@ -4,16 +4,16 @@ consumer = Consumer({
     'bootstrap.servers': 'b-3.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,'
                          'b-1.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,'
                          'b-2.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092',
-    'socket.timeout.ms': 1000,
-      'fetch.wait.max.ms':900,
-    'api.version.request': 'false',
-    'broker.version.fallback': '0.9.0',
-    'message.max.bytes': 1000000000,
     'group.id': 'mygroup',
     'auto.offset.reset': 'earliest',
-    'session.timeout.ms': 10000,  # Default is usually 10000ms (10 seconds)
-    'max.poll.interval.ms': 300000  # Must be >= session.timeout.ms
+    'socket.timeout.ms': 1000,        # Leave as is
+    'fetch.wait.max.ms': 500,         # Lower than socket.timeout.ms by at least 1000ms
+    'session.timeout.ms': 10000,      # Keep default (10 seconds)
+    'api.version.request': 'false',   # Required for older brokers
+    'broker.version.fallback': '0.9.0',  # Fallback for older Kafka versions
+    'message.max.bytes': 1000000000,  # Ensure adequate message size
 })
+
 
 consumer.subscribe(['your-topic-name'])
 
