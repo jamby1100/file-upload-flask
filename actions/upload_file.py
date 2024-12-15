@@ -61,7 +61,7 @@ class UploadFile:
                 if result == "Message sent successfully.":
                     message = consume_message("your-topic-name", timeout=5.0)
                     
-                    print('receive-path',message['data'].strip('"'))
+                    print('receive-path',message['data'])
                     # Update MongoDB document with resized image URL
                     collection.update_one(
                         {"_id": ObjectId(image_mongo_id)},
