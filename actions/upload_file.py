@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from db.mongodb.mongodb import MongoDB
 from db.postgresql.postgresql import PostgreSQL
 from tasks.resize_image import resize_and_upload_image
+from actions.send_kafka import send_msg_async
 from helpers import Helper
 from bson import ObjectId
 
@@ -51,6 +52,12 @@ class UploadFile:
                 resized_path = task.get()  # Wait synchronously for the task to complete
 
                 print ('resize-path',resized_path)
+                
+                #send resize path kafkha
+                send_msg_async(resized_path)
+                
+                
+                
                 # Update MongoDB document with resized image URL
                 collection.update_one(
                     {"_id": ObjectId(image_mongo_id)},
