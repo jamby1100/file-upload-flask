@@ -129,6 +129,8 @@ pip install Flask
 pip install pymongo
 pip install Jinja2
 pip install psycopg2-binary
+pip install confluent-kafka kafka-python
+
 pip freeze > requirements.txt
 
 brew tap mongodb/brew

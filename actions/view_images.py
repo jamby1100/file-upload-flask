@@ -19,8 +19,22 @@ class ViewImage:
         # Process each document to include both original and resized URLs
         parsed = []
         for d in data:
-            original_img_url = url_for('download_file', name=d['original_image_url'])
-            resized_img_url = url_for('download_file', name=d['resized_image_url'])
+            original_image_url_raw = d.get('original_image_url', False)
+            resized_img_url_raw = d.get('resized_image_url', False)
+
+            print("and the raw are...")
+            print(d)
+            print(original_image_url_raw)
+            print(resized_img_url_raw)
+            
+            resized_img_url = None
+            original_img_url = None
+
+            if original_image_url_raw:
+                original_img_url = url_for('download_file', name=original_image_url_raw)
+            
+            if resized_img_url_raw:
+                resized_img_url = url_for('download_file', name=resized_img_url_raw)
 
             parsed.append({
                 "original_image_url": original_img_url,
