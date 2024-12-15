@@ -47,17 +47,17 @@ class UploadFile:
 
                 result = collection.insert_one({"original_image_url": filename})
                 image_mongo_id = result.inserted_id
-
+                print (filename,"filename")
                 # Trigger Celery task and wait for the resized image URL
-                task = resize_and_upload_image.delay(json.dumps({"file_path": file_path, "file_name": filename}), width=200, height=200)
-                resized_path = task.get()  # Wait synchronously for the task to complete
+                # task = resize_and_upload_image.delay(file_path, width=200, height=200)
+                # resized_path = task.get()  # Wait synchronously for the task to complete
 
-                print ('resize-path',resized_path)
+                # print ('resize-path',resized_path)
                 
-                # send resize path kafkha
-                result =  send_msg_async(resized_path)
+                #send resize path kafkha
+                # result =  send_msg_async(resized_path)
                 
-                print ('message-sent?',result)
+                # print ('message-sent?',result)
                 if result == "Message sent successfully.":
                     # fetch message kafka
                     message = consume_message("your-topic-name", timeout=5.0)
@@ -96,7 +96,7 @@ class UploadFile:
                 psql_instance.close()
                 
                 original_img_url = url_for('download_file', name=filename)
-                resized_img_url = url_for('download_file', name=resized_path)
+                # resized_img_url = url_for('download_file', name=resized_path)
 
             if ENV_MODE == "backend":
                 return {
