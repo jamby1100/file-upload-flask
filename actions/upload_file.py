@@ -54,10 +54,10 @@ class UploadFile:
 
                 # print ('resize-path',resized_path)
                 # print(result,"raw-file")
-                # match = re.search(r"ObjectId\('([a-f0-9]+)'\)", str(result))
-                # if match:
-                #      object_id = match.group(1)
-                #      print(object_id,'object_id')
+                match = re.search(r"ObjectId\('([a-f0-9]+)'\)", str(result))
+                if match:
+                     object_id = match.group(1)
+                     print(object_id,'object_id')
                 
                 # # send resize path kafkha
                 result =  send_msg_async({"file-path": file_path, "image_mongo_id": object_id})
