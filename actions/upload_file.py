@@ -77,7 +77,7 @@ class UploadFile:
                     #     {"$set": {"resized-image-path": new_file_path, "image_mongo_id": process_image_mongo_id}}  
                     # )
                     
-                    print("Image resize and file path updated")
+                    # print("Image resize and file path updated")
                 else:
                     print("An error occurred:", result)
                     

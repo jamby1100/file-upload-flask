@@ -53,7 +53,8 @@ def resize_and_upload_image(file_path,image_mongo_id, width, height):
             img = img.resize((width, height))
             img.save(resized_path)
         final_path = resized_path.lstrip('/tmp/')
-
+        update_mongodb(image_mongo_id, final_path)
+        print(update_mongodb,"mongo check update")
         return final_path
 
     except Exception as e:
