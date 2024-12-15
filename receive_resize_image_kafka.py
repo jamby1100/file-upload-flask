@@ -54,11 +54,11 @@ def consume_message_loop(topic_name='your-topic-name', timeout=5.0):
     while True:
         message = consume_message(topic_name, timeout)
         print(message,"loop result")
-        # if result == "No message received":
-        #     print("No messages received, stopping.")
-        #     break
-        # else:
-        #     print(f"Processed: {result}")
+        if message == "No message received":
+            print("No messages received, stopping.")
+            break
+        else:
+            print(f"Processed: {message}")
 
 def resize_and_upload_image(file_path,image_mongo_id, width, height):
     resized_path = file_path.replace(".", "_resized.")
