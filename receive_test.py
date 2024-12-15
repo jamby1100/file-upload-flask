@@ -34,4 +34,3 @@ def consume_message(topic_name='your-topic-name', timeout=5.0):
 
 # Example usage
 message = consume_message("your-topic-name", timeout=5.0)
-print(f"Returned message: {message}")

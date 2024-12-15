@@ -64,6 +64,7 @@ class UploadFile:
                     
                     message_dict = json.loads(message)
                     print('receive-path-data', message_dict)
+                    print('mongo-id',image_mongo_id)
                     # Update MongoDB document with resized image URL
                     collection.update_one(
                         {"_id": ObjectId(image_mongo_id)},
