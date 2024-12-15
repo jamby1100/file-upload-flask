@@ -62,7 +62,7 @@ def resize_and_upload_image(file_path,image_mongo_id, width, height):
     
 def update_mongodb(image_mongo_id,new_file_path):
      mongo_instance = MongoDB()
-     collection = mongo_instance.get_connection("file-uploads")
+     client, database, collection = mongo_instance.get_connection("file-uploads")
      
      try:
         collection.update_one(
@@ -73,4 +73,6 @@ def update_mongodb(image_mongo_id,new_file_path):
 
      except Exception as e:
         raise Exception(f"Update Failed: {e}")
+    
+    
      
