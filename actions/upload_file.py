@@ -57,23 +57,23 @@ class UploadFile:
                 result =  send_msg_async(file_path)
                 
                 print ('message-sent?',result)
-                # if result == "Message sent successfully.":
-                #     # fetch message kafka
-                #     message = consume_message("your-topic-name", timeout=5.0)
+                if result == "Message sent successfully.":
+                    # fetch message kafka
+                    message = consume_message("your-topic-name", timeout=5.0)
+                    print (message,"receive filepath")
+                    # message_dict = json.loads(message)
+                    # print('receive-path-data', message_dict)
+                    # print('mongo-id',image_mongo_id)
                     
-                #     message_dict = json.loads(message)
-                #     print('receive-path-data', message_dict)
-                #     print('mongo-id',image_mongo_id)
+                    # Update MongoDB document with resized image URL
+                    # collection.update_one(
+                    #     {"_id": ObjectId(image_mongo_id)},
+                    #     {"$set": {"resized_image_url": message_dict}}
+                    # )
                     
-                #     # Update MongoDB document with resized image URL
-                #     # collection.update_one(
-                #     #     {"_id": ObjectId(image_mongo_id)},
-                #     #     {"$set": {"resized_image_url": message_dict}}
-                #     # )
-                    
-                #     # print("The message was sent")
-                # else:
-                #     print("An error occurred:", result)
+                    # print("The message was sent")
+                else:
+                    print("An error occurred:", result)
                     
                 
                 
