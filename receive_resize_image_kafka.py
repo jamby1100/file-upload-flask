@@ -52,8 +52,8 @@ def consume_message( topic_name='your-topic-name', timeout=5.0):
 
 def consume_message_loop(topic_name='your-topic-name', timeout=5.0):
     while True:
-        result = consume_message(topic_name, timeout)
-        print(result,"loop result")
+        message = consume_message(topic_name, timeout)
+        print(message,"loop result")
         # if result == "No message received":
         #     print("No messages received, stopping.")
         #     break
