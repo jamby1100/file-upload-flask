@@ -9,7 +9,6 @@ producer = Producer({
     'message.max.bytes': 1000000000
 })
 
-data = {"name": "xyz", "email": "xyz@"}
 
 def send_msg_async(msg):
     try:
