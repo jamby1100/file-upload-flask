@@ -19,24 +19,18 @@ producer = Producer({
 
 
 
-def send_msg_async(msg, msg_id):
+def send_msg_async(msg):
+    # print("Sending message")
     try:
-        # Create the message dictionary with 'id' and 'data' as keys
-        msg_json_str = {"id": msg_id, "data": json.dumps(msg)}
-        
-        # Accessing the 'id' and 'data' part before sending
-        print("Accessing id: ", msg_json_str["id"])
-        print("Accessing data: ", msg_json_str["data"])
-        
-        # Send the message to Kafka
+        msg_json_str = str(json.dumps(msg))
         producer.produce(
             'your-topic-name',
-            json.dumps(msg_json_str)  # Send the whole dictionary as a JSON string
+            msg_json_str
         )
-        
         print('sent-message', msg_json_str)
         producer.flush()
         return "Message sent successfully."
     except Exception as ex:
         print("Error : ", ex)
         return f"Failed to send message: {ex}"
+# send_msg_async(data)
