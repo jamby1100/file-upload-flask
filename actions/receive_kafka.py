@@ -59,14 +59,14 @@ def resize_and_upload_image(file_path,image_mongo_id, width, height):
     except Exception as e:
         raise Exception(f"Image resizing failed: {e}")
     
-def update_mongodb(image_mongo_id,message_dict):
+def update_mongodb(image_mongo_id,new_file_path):
      mongo_instance = MongoDB()
      collection = mongo_instance.get_connection("file-uploads")
      
      try:
         collection.update_one(
                         {"_id": ObjectId(image_mongo_id)},
-                        {"$set": {"resized_image_url": message_dict}}
+                        {"$set": {"resized-image-path": new_file_path, "image_mongo_id": image_mongo_id}}  
                     )
         return "Updated Successfully"
 

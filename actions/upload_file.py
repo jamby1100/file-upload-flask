@@ -72,10 +72,10 @@ class UploadFile:
                     print (new_file_path,"receive filepath")
                     print (process_image_mongo_id,"process_image_mongo_id")
                     # Update MongoDB document with resized image URL
-                    collection.update_one(
-                        {"_id": ObjectId(process_image_mongo_id)},
-                        {"$set": {"resized-image-path": new_file_path, "image_mongo_id": process_image_mongo_id}}  
-                    )
+                    # collection.update_one(
+                    #     {"_id": ObjectId(process_image_mongo_id)},
+                    #     {"$set": {"resized-image-path": new_file_path, "image_mongo_id": process_image_mongo_id}}  
+                    # )
                     
                     print("Image resize and file path updated")
                 else:
