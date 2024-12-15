@@ -28,7 +28,7 @@ def consume_message(self,topic_name='your-topic-name', timeout=5.0):
             return f"Consumer error: {msg.error()}"
         else:
             message_value = msg.value().decode('utf-8')
-            cleaned_message = message_value.strip("'")
+            cleaned_message = message_value[2:-2]
             # parsed_data = json.loads(cleaned_message) 
             # inner_json = json.loads(parsed_data)
             # file_path = inner_json.get("file-path")
