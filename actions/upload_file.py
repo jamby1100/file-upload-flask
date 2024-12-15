@@ -46,34 +46,34 @@ class UploadFile:
                 client, database, collection = mongo_instance.get_connection("file-uploads")
 
                 result = collection.insert_one({"original_image_url": filename})
-                image_mongo_id = result.inserted_id
+                # image_mongo_id = result.inserted_id
                 # Trigger Celery task and wait for the resized image URL
                 # task = resize_and_upload_image.delay(file_path, width=200, height=200)
                 # resized_path = task.get()  # Wait synchronously for the task to complete
 
                 # print ('resize-path',resized_path)
-                
+                print(file_path,"raw-file")
                 # send resize path kafkha
                 result =  send_msg_async(file_path)
                 
-                # print ('message-sent?',result)
-                if result == "Message sent successfully.":
-                    # fetch message kafka
-                    message = consume_message("your-topic-name", timeout=5.0)
+                print ('message-sent?',result)
+                # if result == "Message sent successfully.":
+                #     # fetch message kafka
+                #     message = consume_message("your-topic-name", timeout=5.0)
                     
-                    message_dict = json.loads(message)
-                    print('receive-path-data', message_dict)
-                    print('mongo-id',image_mongo_id)
+                #     message_dict = json.loads(message)
+                #     print('receive-path-data', message_dict)
+                #     print('mongo-id',image_mongo_id)
                     
-                    # Update MongoDB document with resized image URL
-                    # collection.update_one(
-                    #     {"_id": ObjectId(image_mongo_id)},
-                    #     {"$set": {"resized_image_url": message_dict}}
-                    # )
+                #     # Update MongoDB document with resized image URL
+                #     # collection.update_one(
+                #     #     {"_id": ObjectId(image_mongo_id)},
+                #     #     {"$set": {"resized_image_url": message_dict}}
+                #     # )
                     
-                    # print("The message was sent")
-                else:
-                    print("An error occurred:", result)
+                #     # print("The message was sent")
+                # else:
+                #     print("An error occurred:", result)
                     
                 
                 
