@@ -1,5 +1,5 @@
 import os
-
+import json
 from decimal import Decimal
 from flask import flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
@@ -62,7 +62,8 @@ class UploadFile:
                     message = consume_message("your-topic-name", timeout=5.0)
                     
                     print('receive-path',message)
-                    print(type(message))
+                    message_dict = json.loads(message)
+                    print('receive-path-data', message_dict['data'])
                     # Update MongoDB document with resized image URL
                     collection.update_one(
                         {"_id": ObjectId(image_mongo_id)},
