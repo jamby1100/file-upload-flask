@@ -53,33 +53,33 @@ class UploadFile:
                 # resized_path = task.get()  # Wait synchronously for the task to complete
 
                 # print ('resize-path',resized_path)
-                print(result,"raw-file")
-                match = re.search(r"ObjectId\('([a-f0-9]+)'\)", str(result))
-                if match:
-                     object_id = match.group(1)
-                     print(object_id,'object_id')
-                # send resize path kafkha
-                result =  send_msg_async({"file-path": file_path, "image_mongo_id": object_id})
+                # print(result,"raw-file")
+                # match = re.search(r"ObjectId\('([a-f0-9]+)'\)", str(result))
+                # if match:
+                #      object_id = match.group(1)
+                #      print(object_id,'object_id')
+                # # send resize path kafkha
+                # result =  send_msg_async({"file-path": file_path, "image_mongo_id": object_id})
                 
-                print ('message-sent?',result)
-                if result == "Message sent successfully.":
-                    # fetch message kafka
-                    message = consume_message("your-topic-name", timeout=5.0)
+                # print ('message-sent?',result)
+                # if result == "Message sent successfully.":
+                #     # fetch message kafka
+                #     message = consume_message("your-topic-name", timeout=5.0)
                     
-                    new_file_path = message.get("file-path")
-                    process_image_mongo_id = message.get("image_mongo_id") 
+                #     new_file_path = message.get("file-path")
+                #     process_image_mongo_id = message.get("image_mongo_id") 
                     
-                    print (new_file_path,"receive filepath")
-                    print (process_image_mongo_id,"process_image_mongo_id")
-                    # Update MongoDB document with resized image URL
-                    # collection.update_one(
-                    #     {"_id": ObjectId(process_image_mongo_id)},
-                    #     {"$set": {"resized-image-path": new_file_path, "image_mongo_id": process_image_mongo_id}}  
-                    # )
+                #     print (new_file_path,"receive filepath")
+                #     print (process_image_mongo_id,"process_image_mongo_id")
+                #     # Update MongoDB document with resized image URL
+                #     # collection.update_one(
+                #     #     {"_id": ObjectId(process_image_mongo_id)},
+                #     #     {"$set": {"resized-image-path": new_file_path, "image_mongo_id": process_image_mongo_id}}  
+                #     # )
                     
-                    # print("Image resize and file path updated")
-                else:
-                    print("An error occurred:", result)
+                #     # print("Image resize and file path updated")
+                # else:
+                #     print("An error occurred:", result)
                     
                 
                 
