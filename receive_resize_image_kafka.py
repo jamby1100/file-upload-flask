@@ -89,5 +89,6 @@ def update_mongodb(image_mongo_id,new_file_path):
      except Exception as e:
         raise Exception(f"Update Failed: {e}")
     
-    
+consume_message_loop()
+
      
