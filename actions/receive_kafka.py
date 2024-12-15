@@ -1,6 +1,9 @@
 from confluent_kafka import Consumer
 from PIL import Image
 import json 
+from db.mongodb.mongodb import MongoDB
+from bson import ObjectId
+
 def consume_message(self,topic_name='your-topic-name', timeout=5.0):
     consumer = Consumer({
         'bootstrap.servers': 'b-3.unauth.xbyahs.c3.kafka.ap-southeast-1.amazonaws.com:9092,' 
@@ -37,24 +40,39 @@ def consume_message(self,topic_name='your-topic-name', timeout=5.0):
             # file_path = inner_json.get("file-path")
             # parsed_data = json.loads(message_value)
             print("Received message:",file_path)
-            task = resize_and_upload_image(file_path, width=200, height=200)
+            task = resize_and_upload_image(file_path,image_mongo_id, width=200, height=200)
             
             print(task,"path resize")
             return cleaned_message
     finally:
         consumer.close()
 
-def resize_and_upload_image(file_path, width, height):
+def resize_and_upload_image(file_path,image_mongo_id, width, height):
     resized_path = file_path.replace(".", "_resized.")
     try:
         with Image.open(file_path) as img:
             img = img.resize((width, height))
             img.save(resized_path)
         final_path = resized_path.lstrip('/tmp/')
+        
+        update_mongodb(image_mongo_id,final_path)
+        print(update_mongodb,"check if updated")
         return final_path
 
     except Exception as e:
         raise Exception(f"Image resizing failed: {e}")
-# Example usage
-# message = consume_message("your-topic-name", timeout=5.0)
-# print(f"Returned message: {message}")
+    
+def update_mongodb(image_mongo_id,message_dict):
+     mongo_instance = MongoDB()
+     collection = mongo_instance.get_connection("file-uploads")
+     
+     try:
+        collection.update_one(
+                        {"_id": ObjectId(image_mongo_id)},
+                        {"$set": {"resized_image_url": message_dict}}
+                    )
+        return "Updated Successfully"
+
+     except Exception as e:
+        raise Exception(f"Update Failed: {e}")
+     
