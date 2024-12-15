@@ -50,14 +50,6 @@ def consume_message( topic_name='your-topic-name', timeout=5.0):
     finally:
         consumer.close()
 
-# def consume_message_loop(topic_name='your-topic-name', timeout=5.0):
-#     while True:
-#         result = consume_message(topic_name, timeout)
-#         if result == "No message received":
-#             print("No messages received, stopping.")
-#             break
-#         else:
-#             print(f"Processed: {result}")
 
 def resize_and_upload_image(file_path,image_mongo_id, width, height):
     resized_path = file_path.replace(".", "_resized.")
@@ -70,7 +62,7 @@ def resize_and_upload_image(file_path,image_mongo_id, width, height):
         # update mongodb
         update_mongodb(image_mongo_id, final_path)
         
-        return "Updated Successfully"
+        return final_path
 
     except Exception as e:
         raise Exception(f"Image resizing failed: {e}")
@@ -89,5 +81,5 @@ def update_mongodb(image_mongo_id,new_file_path):
      except Exception as e:
         raise Exception(f"Update Failed: {e}")
     
-    
+
      
