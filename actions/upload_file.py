@@ -58,8 +58,9 @@ class UploadFile:
                 # if match:
                 #      object_id = match.group(1)
                 #      print(object_id,'object_id')
+                
                 # # send resize path kafkha
-                # result =  send_msg_async({"file-path": file_path, "image_mongo_id": object_id})
+                result =  send_msg_async({"file-path": file_path, "image_mongo_id": object_id})
                 
                 # print ('message-sent?',result)
                 # if result == "Message sent successfully.":
