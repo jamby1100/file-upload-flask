@@ -43,12 +43,20 @@ class UploadFile:
                 file.save(file_path)
 
                 # save image_metadata to MongoDB
+                collection_name = "file-uploads"
                 mongo_instance = MongoDB()
                 client, database, collection = mongo_instance.get_connection("file-uploads")
 
                 result = collection.insert_one({"original_image_url": filename})
                 image_mongo_id = result.inserted_id
-              
+                print("Collections in the database:")
+                print(database.list_collection_names())
+
+                # Iterate through collections and print their contents
+                for collection_name in database.list_collection_names():
+                    print(f"\nContents of collection '{collection_name}':")
+                    for document in database[collection_name].find():
+                        print(document)
                 # parse objectid of mongo id
                 match = re.search(r"ObjectId\('([a-f0-9]+)'\)", str(result))
                 if match:
@@ -76,13 +84,17 @@ class UploadFile:
                 )
                 psql_instance.close()
                 
+                resized_path = file_path.replace(".", "_resized.")
+                new_file_path = resized_path.lstrip('/tmp/')
+                
                 original_img_url = url_for('download_file', name=filename)
+                resized_img_url = url_for('download_file', name=new_file_path)
 
             if ENV_MODE == "backend":
                 return {
                     "filename": filename,
                     "original_img_url": original_img_url,
-                    # "resized_img_url": resized_img_url
+                    "resized_img_url": resized_img_url
                 }
             else:
                 return f'''
@@ -90,7 +102,9 @@ class UploadFile:
                 <html>
                     <h1>{filename}</h1>
                     <img src="{original_img_url}" alt="Original Image"></img>
-                   
+                    <h1>{new_file_path} 200x200</h1>
+                    <img src="{resized_img_url}" alt="Resized Image"></img>
+
                 </html>
                 '''
             redirect()

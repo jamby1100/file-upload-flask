@@ -74,7 +74,7 @@ def update_mongodb(image_mongo_id,new_file_path):
      try:
         collection.update_one(
                         {"_id": ObjectId(image_mongo_id)},
-                        {"$set": {"resized-image-path": new_file_path, "image_mongo_id": image_mongo_id}}  
+                        {"$set": {"resized_image_url": new_file_path, "image_mongo_id": image_mongo_id}}  
                     )
         
         client.close()
