@@ -74,6 +74,7 @@ def resize_and_upload_image(file_path,image_mongo_id, width, height):
         
         # update mongodb
         print("updating mongodb")
+        print("updating with MONGODB ID", image_mongo_id)
         update_mongodb(image_mongo_id, final_path)
         print("updating mongodb COMPLETED")
         
