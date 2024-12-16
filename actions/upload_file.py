@@ -84,13 +84,17 @@ class UploadFile:
                 )
                 psql_instance.close()
                 
+                resized_path = file_path.replace(".", "_resized.")
+                new_file_path = resized_path.lstrip('/tmp/')
+                
                 original_img_url = url_for('download_file', name=filename)
+                resized_img_url = url_for('download_file', name=new_file_path)
 
             if ENV_MODE == "backend":
                 return {
                     "filename": filename,
                     "original_img_url": original_img_url,
-                    # "resized_img_url": resized_img_url
+                    "resized_img_url": resized_img_url
                 }
             else:
                 return f'''
@@ -98,7 +102,9 @@ class UploadFile:
                 <html>
                     <h1>{filename}</h1>
                     <img src="{original_img_url}" alt="Original Image"></img>
-                   
+                    <h1>{new_file_path} 200x200</h1>
+                    <img src="{resized_img_url}" alt="Resized Image"></img>
+
                 </html>
                 '''
             redirect()
