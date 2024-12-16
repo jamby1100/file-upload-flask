@@ -38,7 +38,8 @@ class ViewImage:
 
             parsed.append({
                 "original_image_url": original_img_url,
-                "resized_image_url": resized_img_url
+                "resized_image_url": resized_img_url,
+                "_id": d["_id"]
             })
         
         if ENV_MODE == "backend":
