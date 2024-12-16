@@ -85,14 +85,20 @@ def resize_and_upload_image(file_path,image_mongo_id, width, height):
     
 def update_mongodb(image_mongo_id,new_file_path):
      mongo_instance = MongoDB()
+     print("getting connection")
      client, database, collection = mongo_instance.get_connection("file-uploads")
+     print("getting connection - COMPLETED")
      
      try:
+        print("updating collection")
         collection.update_one(
                         {"_id": ObjectId(image_mongo_id)},
                         {"$set": {"resized-image-path": new_file_path, "image_mongo_id": image_mongo_id}}  
                     )
+        print("updating collection - DONE:")
+        print("close conn")
         client.close()
+        print("close conn - done")
         return "Updated Successfully"
 
      except Exception as e:
