@@ -11,6 +11,10 @@ class MongoDB:
 
   def get_connection(self, collection_name):
     try:
+        print("AND THE CONNECTION INFO ARE")
+        print(self.uri)
+        print("AND THE DB")
+        print(self.db_name)
         client = MongoClient(self.uri)
         database = client[self.db_name]
         collection = database[collection_name]        
