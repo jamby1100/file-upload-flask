@@ -76,6 +76,8 @@ def update_mongodb(image_mongo_id,new_file_path):
                         {"_id": ObjectId(image_mongo_id)},
                         {"$set": {"resized-image-path": new_file_path, "image_mongo_id": image_mongo_id}}  
                     )
+        
+        client.close()
         return "Updated Successfully"
 
      except Exception as e:
