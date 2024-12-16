@@ -5,6 +5,8 @@ def create_mongodb_raw_connect():
     db_name = os.getenv("MONGODB_DB_NAME")
     uri = os.getenv("MONGODB_DB_CONNECTION_URI")
 
+    print("Creating connection with: ", uri)
+
     try:
         client = MongoClient(uri)
     except Exception as e:
