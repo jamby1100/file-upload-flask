@@ -43,12 +43,20 @@ class UploadFile:
                 file.save(file_path)
 
                 # save image_metadata to MongoDB
+                collection_name = "file-uploads"
                 mongo_instance = MongoDB()
                 client, database, collection = mongo_instance.get_connection("file-uploads")
 
                 result = collection.insert_one({"original_image_url": filename})
                 image_mongo_id = result.inserted_id
-              
+                print("Collections in the database:")
+                print(database.list_collection_names())
+
+                # Iterate through collections and print their contents
+                for collection_name in database.list_collection_names():
+                    print(f"\nContents of collection '{collection_name}':")
+                    for document in database[collection_name].find():
+                        print(document)
                 # parse objectid of mongo id
                 match = re.search(r"ObjectId\('([a-f0-9]+)'\)", str(result))
                 if match:
