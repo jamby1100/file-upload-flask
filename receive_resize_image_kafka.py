@@ -62,14 +62,20 @@ def consume_message_loop(topic_name='your-topic-name', timeout=5.0):
 
 def resize_and_upload_image(file_path,image_mongo_id, width, height):
     resized_path = file_path.replace(".", "_resized.")
+    print("trying image resize")
+
     try:
         with Image.open(file_path) as img:
             img = img.resize((width, height))
             img.save(resized_path)
+        
+        print("resize completed")
         final_path = resized_path.lstrip('/tmp/')
         
         # update mongodb
+        print("updating mongodb")
         update_mongodb(image_mongo_id, final_path)
+        print("updating mongodb COMPLETED")
         
         return final_path
 
