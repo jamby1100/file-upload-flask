@@ -20,7 +20,7 @@ class ViewImage:
         parsed = []
         for d in data:
             original_image_url_raw = d.get('original_image_url', False)
-            resized_img_url_raw = d.get('resized-image-path', False)
+            resized_img_url_raw = d.get('resized_image_url', False)
 
             print("and the raw are...")
             print(d)
