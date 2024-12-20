@@ -34,6 +34,7 @@ class ViewImage:
                 original_img_url = url_for('download_file', name=original_image_url_raw)
             
             if resized_img_url_raw:
+                resized_img_url_raw = resized_img_url_raw.replace("home/ec2-user/efs/", "")
                 resized_img_url = url_for('download_file', name=resized_img_url_raw)
 
             parsed.append({
